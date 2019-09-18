@@ -125,7 +125,10 @@ int MCP3422::readInputValue(int fd, MCP3422::Channel channel)
         writeBuf = 0xD3; // 0b11010011
         break;
     }
-    write(fd, &writeBuf, 1);
+    if (write(fd, &writeBuf, 1) == -1) {
+        qCWarning(dcUniPi()) << "MCP3422: could not start conversion";
+        return 0;
+    }
 
     // Wait for conversion complete
     unsigned char readBuf[2] = {0};
