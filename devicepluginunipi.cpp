@@ -42,12 +42,11 @@ void DevicePluginUniPi::init()
     QLoggingCategory::setFilterRules(QStringLiteral("qt.modbus* = false"));
 }
 
-Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &deviceClassId, const ParamList &params)
+void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
 {
-    Q_UNUSED(params);
+    DeviceClassId deviceClassId = info->deviceClassId();
 
     if (deviceClassId == digitalInputDeviceClassId) {
-        QList<DeviceDescriptor> deviceDescriptors;
         foreach(Device *parentDevice, myDevices()) {
             if ((parentDevice->deviceClassId() == uniPi1DeviceClassId) || (parentDevice->deviceClassId() == uniPi1LiteDeviceClassId)) {
                 foreach (QString circuit, m_unipi->digitalInputs()) {
@@ -63,7 +62,7 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                     params.append(Param(digitalInputDeviceCircuitParamTypeId, circuit));
                     params.append(Param(digitalInputDeviceParentIdParamTypeId, parentDevice->id()));
                     deviceDescriptor.setParams(params);
-                    deviceDescriptors.append(deviceDescriptor);
+                    info->addDeviceDescriptor(deviceDescriptor);
                 }
                 break;
             }
@@ -84,7 +83,7 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                 params.append(Param(digitalInputDeviceCircuitParamTypeId, circuit));
                 params.append(Param(digitalInputDeviceParentIdParamTypeId, parentDeviceId));
                 deviceDescriptor.setParams(params);
-                deviceDescriptors.append(deviceDescriptor);
+                info->addDeviceDescriptor(deviceDescriptor);
             }
         }
 
@@ -103,18 +102,13 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                 params.append(Param(digitalInputDeviceCircuitParamTypeId, circuit));
                 params.append(Param(digitalInputDeviceParentIdParamTypeId, parentDeviceId));
                 deviceDescriptor.setParams(params);
-                deviceDescriptors.append(deviceDescriptor);
+                info->addDeviceDescriptor(deviceDescriptor);
             }
         }
-        if (!deviceDescriptors.isEmpty()) {
-            emit devicesDiscovered(digitalInputDeviceClassId, deviceDescriptors);
-        } else {
-            return Device::DeviceErrorNoError;
-        }
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if (deviceClassId == digitalOutputDeviceClassId) {
-        QList<DeviceDescriptor> deviceDescriptors;
         foreach(Device *parentDevice, myDevices()) {
             if ((parentDevice->deviceClassId() == uniPi1DeviceClassId) || (parentDevice->deviceClassId() == uniPi1LiteDeviceClassId)) {
                 foreach (QString circuit, m_unipi->digitalOutputs()) {
@@ -130,7 +124,7 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                     params.append(Param(digitalOutputDeviceCircuitParamTypeId, circuit));
                     params.append(Param(digitalOutputDeviceParentIdParamTypeId, parentDevice->id()));
                     deviceDescriptor.setParams(params);
-                    deviceDescriptors.append(deviceDescriptor);
+                    info->addDeviceDescriptor(deviceDescriptor);
                 }
                 break;
             }
@@ -151,7 +145,7 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                 params.append(Param(digitalOutputDeviceCircuitParamTypeId, circuit));
                 params.append(Param(digitalOutputDeviceParentIdParamTypeId, parentDeviceId));
                 deviceDescriptor.setParams(params);
-                deviceDescriptors.append(deviceDescriptor);
+                info->addDeviceDescriptor(deviceDescriptor);
             }
         }
 
@@ -170,18 +164,13 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                 params.append(Param(digitalOutputDeviceCircuitParamTypeId, circuit));
                 params.append(Param(digitalOutputDeviceParentIdParamTypeId, parentDeviceId));
                 deviceDescriptor.setParams(params);
-                deviceDescriptors.append(deviceDescriptor);
+                info->addDeviceDescriptor(deviceDescriptor);
             }
         }
-        if (!deviceDescriptors.isEmpty()) {
-            emit devicesDiscovered(digitalOutputDeviceClassId, deviceDescriptors);
-        } else {
-            return Device::DeviceErrorNoError;
-        }
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if (deviceClassId == analogInputDeviceClassId) {
-        QList<DeviceDescriptor> deviceDescriptors;
         foreach(Device *parentDevice, myDevices()) {
             if ((parentDevice->deviceClassId() == uniPi1DeviceClassId) || (parentDevice->deviceClassId() == uniPi1LiteDeviceClassId)) {
                 foreach (QString circuit, m_unipi->analogInputs()) {
@@ -197,7 +186,7 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                     params.append(Param(analogInputDeviceCircuitParamTypeId, circuit));
                     params.append(Param(analogInputDeviceParentIdParamTypeId, parentDevice->id()));
                     deviceDescriptor.setParams(params);
-                    deviceDescriptors.append(deviceDescriptor);
+                    info->addDeviceDescriptor(deviceDescriptor);
                 }
                 break;
             }
@@ -218,7 +207,7 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                 params.append(Param(analogInputDeviceCircuitParamTypeId, circuit));
                 params.append(Param(analogInputDeviceParentIdParamTypeId, parentDeviceId));
                 deviceDescriptor.setParams(params);
-                deviceDescriptors.append(deviceDescriptor);
+                info->addDeviceDescriptor(deviceDescriptor);
             }
         }
 
@@ -237,20 +226,15 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                 params.append(Param(analogInputDeviceCircuitParamTypeId, circuit));
                 params.append(Param(analogInputDeviceParentIdParamTypeId, parentDeviceId));
                 deviceDescriptor.setParams(params);
-                deviceDescriptors.append(deviceDescriptor);
+                info->addDeviceDescriptor(deviceDescriptor);
             }
         }
-        if (!deviceDescriptors.isEmpty()) {
-            emit devicesDiscovered(analogInputDeviceClassId, deviceDescriptors);
-        } else {
-            return Device::DeviceErrorNoError;
-        }
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if (deviceClassId == analogOutputDeviceClassId) {
         //TODO add unipi 1 and unipi 1 lite
 
-        QList<DeviceDescriptor> deviceDescriptors;
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
             DeviceId parentDeviceId = m_neuronExtensions.key(neuronExtension);
             foreach (QString circuit, neuronExtension->analogOutputs()) {
@@ -266,7 +250,7 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                 params.append(Param(analogOutputDeviceCircuitParamTypeId, circuit));
                 params.append(Param(analogOutputDeviceParentIdParamTypeId, parentDeviceId));
                 deviceDescriptor.setParams(params);
-                deviceDescriptors.append(deviceDescriptor);
+                info->addDeviceDescriptor(deviceDescriptor);
             }
         }
 
@@ -285,14 +269,10 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                 params.append(Param(analogOutputDeviceCircuitParamTypeId, circuit));
                 params.append(Param(analogOutputDeviceParentIdParamTypeId, parentDeviceId));
                 deviceDescriptor.setParams(params);
-                deviceDescriptors.append(deviceDescriptor);
+                info->addDeviceDescriptor(deviceDescriptor);
             }
         }
-        if (!deviceDescriptors.isEmpty()) {
-            emit devicesDiscovered(analogOutputDeviceClassId, deviceDescriptors);
-        } else {
-            return Device::DeviceErrorNoError;
-        }
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if (deviceClassId == userLEDDeviceClassId) {
@@ -312,7 +292,7 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                 params.append(Param(userLEDDeviceCircuitParamTypeId, circuit));
                 params.append(Param(userLEDDeviceParentIdParamTypeId, parentDeviceId));
                 deviceDescriptor.setParams(params);
-                deviceDescriptors.append(deviceDescriptor);
+                info->addDeviceDescriptor(deviceDescriptor);
             }
         }
 
@@ -331,20 +311,19 @@ Device::DeviceError DevicePluginUniPi::discoverDevices(const DeviceClassId &devi
                 params.append(Param(userLEDDeviceCircuitParamTypeId, circuit));
                 params.append(Param(userLEDDeviceParentIdParamTypeId, parentDeviceId));
                 deviceDescriptor.setParams(params);
-                deviceDescriptors.append(deviceDescriptor);
+                info->addDeviceDescriptor(deviceDescriptor);
             }
         }
-        if (!deviceDescriptors.isEmpty()) {
-            emit devicesDiscovered(userLEDDeviceClassId, deviceDescriptors);
-        } else {
-            return Device::DeviceErrorNoError;
-        }
+        return info->finish(Device::DeviceErrorNoError);
     }
-    return Device::DeviceErrorAsync;
+
+    qCWarning(dcUniPi()) << "Unhandled device class in discoverDevice";
 }
 
-Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
+void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 {
+    Device *device = info->device();
+
     if (!m_reconnectTimer) {
         m_reconnectTimer = new QTimer(this);
         m_reconnectTimer->setSingleShot(true);
@@ -354,13 +333,13 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
     if(device->deviceClassId() == uniPi1DeviceClassId) {
         if (m_unipi)
-            return Device::DeviceSetupStatusFailure; //only one parent device allowed
+            return info->finish(Device::DeviceErrorDeviceInUse, QT_TR_NOOP("There is already a UniPi gateway in the system.")); //only one parent device allowed
 
         m_unipi = new UniPi(UniPi::UniPiType::UniPi1, this);
         if (!m_unipi->init()) {
             qCWarning(dcUniPi()) << "Could not setup UniPi";
             m_unipi->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up UniPi."));
         }
         connect(m_unipi, &UniPi::digitalInputStatusChanged, this, &DevicePluginUniPi::onUniPiDigitalInputStatusChanged);
         connect(m_unipi, &UniPi::digitalOutputStatusChanged, this, &DevicePluginUniPi::onUniPiDigitalOutputStatusChanged);
@@ -368,17 +347,17 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
         connect(m_unipi, &UniPi::analogOutputStatusChanged, this, &DevicePluginUniPi::onUniPiAnalogOutputStatusChanged);
         device->setStateValue(uniPi1ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
     if(device->deviceClassId() == uniPi1LiteDeviceClassId) {
         if (m_unipi)
-            return Device::DeviceSetupStatusFailure; //only one parent device allowed
+            return info->finish(Device::DeviceErrorDeviceInUse, QT_TR_NOOP("There is already a UniPi Lite gateway in the system.")); //only one parent device allowed
 
         m_unipi = new UniPi(UniPi::UniPiType::UniPi1Lite, this);
         if (!m_unipi->init()) {
             qCWarning(dcUniPi()) << "Could not setup UniPi";
             m_unipi->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up UniPi."));
         }
         connect(m_unipi, &UniPi::digitalInputStatusChanged, this, &DevicePluginUniPi::onUniPiDigitalInputStatusChanged);
         connect(m_unipi, &UniPi::digitalOutputStatusChanged, this, &DevicePluginUniPi::onUniPiDigitalOutputStatusChanged);
@@ -386,17 +365,17 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
         connect(m_unipi, &UniPi::analogOutputStatusChanged, this, &DevicePluginUniPi::onUniPiAnalogOutputStatusChanged);
         device->setStateValue(uniPi1LiteConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
     if(device->deviceClassId() == neuronS103DeviceClassId) {
         if (!neuronDeviceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::S103, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron device."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -407,18 +386,18 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
         device->setStateValue(neuronS103ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronM103DeviceClassId) {
         if (!neuronDeviceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::M103, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -429,18 +408,18 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
         device->setStateValue(neuronM103ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronM203DeviceClassId) {
         if (!neuronDeviceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::M203, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -451,18 +430,18 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
         device->setStateValue(neuronM203ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronM303DeviceClassId) {
         if (!neuronDeviceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::M303, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -473,18 +452,18 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
         device->setStateValue(neuronM303ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronM403DeviceClassId) {
         if (!neuronDeviceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::M403, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -495,18 +474,18 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
         device->setStateValue(neuronM403ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronM503DeviceClassId) {
         if (!neuronDeviceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::M503, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -517,18 +496,18 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
         device->setStateValue(neuronM503ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronL203DeviceClassId) {
         if (!neuronDeviceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::L203, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -539,18 +518,18 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
         device->setStateValue(neuronL203ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronL303DeviceClassId) {
         if (!neuronDeviceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::L303, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -561,18 +540,18 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
         device->setStateValue(neuronL303ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronL403DeviceClassId) {
         if (!neuronDeviceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::L403, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -583,18 +562,18 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
         device->setStateValue(neuronL403ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronL503DeviceClassId) {
         if (!neuronDeviceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::L503, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -605,18 +584,18 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
         device->setStateValue(neuronL503ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronL513DeviceClassId) {
         if (!neuronDeviceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::L513, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -627,19 +606,19 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
 
         device->setStateValue(neuronL513ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronXS10DeviceClassId) {
         if (!neuronExtensionInterfaceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         int slaveAddress = device->paramValue(neuronXS10DeviceSlaveAddressParamTypeId).toInt();
         NeuronExtension *neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS10, m_modbusRTUMaster, slaveAddress, this);
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         connect(neuronExtension, &NeuronExtension::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalInputStatusChanged);
         connect(neuronExtension, &NeuronExtension::digitalOutputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalOutputStatusChanged);
@@ -650,19 +629,19 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
         m_neuronExtensions.insert(device->id(), neuronExtension);
         device->setStateValue(neuronXS10ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronXS20DeviceClassId) {
         if (!neuronExtensionInterfaceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         int slaveAddress = device->paramValue(neuronXS20DeviceSlaveAddressParamTypeId).toInt();
         NeuronExtension *neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS20, m_modbusRTUMaster, slaveAddress, this);
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         connect(neuronExtension, &NeuronExtension::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalInputStatusChanged);
         connect(neuronExtension, &NeuronExtension::digitalOutputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalOutputStatusChanged);
@@ -673,19 +652,19 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
         m_neuronExtensions.insert(device->id(), neuronExtension);
         device->setStateValue(neuronXS20ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronXS30DeviceClassId) {
         if (!neuronExtensionInterfaceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         int slaveAddress = device->paramValue(neuronXS30DeviceSlaveAddressParamTypeId).toInt();
         NeuronExtension *neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS30, m_modbusRTUMaster, slaveAddress, this);
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         connect(neuronExtension, &NeuronExtension::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalInputStatusChanged);
         connect(neuronExtension, &NeuronExtension::digitalOutputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalOutputStatusChanged);
@@ -696,19 +675,19 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
         m_neuronExtensions.insert(device->id(), neuronExtension);
         device->setStateValue(neuronXS30ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronXS40DeviceClassId) {
         if (!neuronExtensionInterfaceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         int slaveAddress = device->paramValue(neuronXS40DeviceSlaveAddressParamTypeId).toInt();
         NeuronExtension *neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS40, m_modbusRTUMaster, slaveAddress, this);
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         connect(neuronExtension, &NeuronExtension::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalInputStatusChanged);
         connect(neuronExtension, &NeuronExtension::digitalOutputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalOutputStatusChanged);
@@ -719,19 +698,19 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
         m_neuronExtensions.insert(device->id(), neuronExtension);
         device->setStateValue(neuronXS40ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if(device->deviceClassId() == neuronXS50DeviceClassId) {
         if (!neuronExtensionInterfaceInit())
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
 
         int slaveAddress = device->paramValue(neuronXS50DeviceSlaveAddressParamTypeId).toInt();
         NeuronExtension *neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS50, m_modbusRTUMaster, slaveAddress, this);
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
-            return Device::DeviceSetupStatusFailure;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
         }
         connect(neuronExtension, &NeuronExtension::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalInputStatusChanged);
         connect(neuronExtension, &NeuronExtension::digitalOutputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalOutputStatusChanged);
@@ -742,34 +721,38 @@ Device::DeviceSetupStatus DevicePluginUniPi::setupDevice(Device *device)
         m_neuronExtensions.insert(device->id(), neuronExtension);
         device->setStateValue(neuronXS50ConnectedStateTypeId, true);
 
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if (device->deviceClassId() == digitalOutputDeviceClassId) {
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if (device->deviceClassId() == digitalInputDeviceClassId) {
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if (device->deviceClassId() == userLEDDeviceClassId) {
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if (device->deviceClassId() == analogInputDeviceClassId) {
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
 
     if (device->deviceClassId() == analogOutputDeviceClassId) {
-        return Device::DeviceSetupStatusSuccess;
+        return info->finish(Device::DeviceErrorNoError);
     }
-    return Device::DeviceSetupStatusFailure;
+
+    qCWarning(dcUniPi()) << "Unhandled device class in setupDevice";
 }
 
 
-Device::DeviceError DevicePluginUniPi::executeAction(Device *device, const Action &action)
+void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
 {
+    Device *device = info->device();
+    Action action = info->action();
+
     if (device->deviceClassId() == digitalOutputDeviceClassId)  {
 
         if (action.actionTypeId() == digitalOutputPowerActionTypeId) {
@@ -787,9 +770,9 @@ Device::DeviceError DevicePluginUniPi::executeAction(Device *device, const Actio
                 NeuronExtension *neuronExtension = m_neuronExtensions.value(device->paramValue(digitalOutputDeviceParentIdParamTypeId).toString());
                 neuronExtension->setDigitalOutput(digitalOutputNumber, stateValue);
             }
-            return Device::DeviceErrorNoError;
+            return info->finish(Device::DeviceErrorNoError);
         }
-        return Device::DeviceErrorActionTypeNotFound;
+        return info->finish(Device::DeviceErrorActionTypeNotFound);
     }
 
     if (device->deviceClassId() == analogOutputDeviceClassId) {
@@ -809,9 +792,9 @@ Device::DeviceError DevicePluginUniPi::executeAction(Device *device, const Actio
                 NeuronExtension *neuronExtension = m_neuronExtensions.value(device->paramValue(analogOutputDeviceParentIdParamTypeId).toString());
                 neuronExtension->setAnalogOutput(analogOutputNumber, analogValue);
             }
-            return Device::DeviceErrorNoError;
+            return info->finish(Device::DeviceErrorNoError);
         }
-        return Device::DeviceErrorActionTypeNotFound;
+        return info->finish(Device::DeviceErrorActionTypeNotFound);
     }
 
     if (device->deviceClassId() == userLEDDeviceClassId) {
@@ -826,11 +809,12 @@ Device::DeviceError DevicePluginUniPi::executeAction(Device *device, const Actio
                 NeuronExtension *neuronExtension = m_neuronExtensions.value(device->paramValue(userLEDDeviceParentIdParamTypeId).toString());
                 neuronExtension->setUserLED(userLED, stateValue);
             }
-            return Device::DeviceErrorNoError;
+            return info->finish(Device::DeviceErrorNoError);
         }
-        return Device::DeviceErrorActionTypeNotFound;
+        return info->finish(Device::DeviceErrorActionTypeNotFound);
     }
-    return Device::DeviceErrorDeviceClassNotFound;
+
+    qCWarning(dcUniPi()) << "Unhandled device class in executeAction";
 }
 
 
