@@ -54,7 +54,7 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
                     foreach(Device *device, myDevices().filterByParam(digitalInputDeviceParentIdParamTypeId, parentDevice->id())) {
                         if (device->paramValue(digitalInputDeviceCircuitParamTypeId) == circuit) {
                             qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentDevice->id();
-                            deviceDescriptor.setDeviceId(parentDevice->id());
+                            deviceDescriptor.setDeviceId(device->id());
                             break;
                         }
                     }
@@ -74,8 +74,8 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
                 DeviceDescriptor deviceDescriptor(digitalInputDeviceClassId, QString("Digital input %1").arg(circuit), QString("Neuron extension %1, slave address %2").arg(neuronExtension->type().arg(QString::number(neuronExtension->slaveAddress()))), parentDeviceId);
                 foreach(Device *device, myDevices().filterByParam(digitalInputDeviceParentIdParamTypeId, m_neuronExtensions.key(neuronExtension))) {
                     if (device->paramValue(digitalInputDeviceCircuitParamTypeId) == circuit) {
-                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentDeviceId;
-                        deviceDescriptor.setDeviceId(parentDeviceId);
+                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit;
+                        deviceDescriptor.setDeviceId(device->id());
                         break;
                     }
                 }
@@ -94,7 +94,7 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
                 foreach(Device *device, myDevices().filterByParam(digitalInputDeviceParentIdParamTypeId, m_neurons.key(neuron))) {
                     if (device->paramValue(digitalInputDeviceCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentDeviceId;
-                        deviceDescriptor.setDeviceId(parentDeviceId);
+                        deviceDescriptor.setDeviceId(device->id());
                         break;
                     }
                 }
@@ -116,7 +116,7 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
                     foreach(Device *device, myDevices().filterByParam(digitalOutputDeviceParentIdParamTypeId, parentDevice->id())) {
                         if (device->paramValue(digitalOutputDeviceCircuitParamTypeId) == circuit) {
                             qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentDevice->id();
-                            deviceDescriptor.setDeviceId(parentDevice->id());
+                            deviceDescriptor.setDeviceId(device->id());
                             break;
                         }
                     }
@@ -833,6 +833,7 @@ void DevicePluginUniPi::deviceRemoved(Device *device)
     if ((device->deviceClassId() == uniPi1DeviceClassId) || (device->deviceClassId() == uniPi1LiteDeviceClassId)) {
         if(m_unipi) {
             m_unipi->deleteLater();
+            m_unipi = nullptr;
         }
     }
 
@@ -1125,6 +1126,7 @@ void DevicePluginUniPi::onModbusRTUStateChanged(QModbusDevice::State state)
 
 void DevicePluginUniPi::onUniPiDigitalInputStatusChanged(const QString &circuit, bool value)
 {
+
     foreach(Device *parentDevice, myDevices()) {
         if ((parentDevice->deviceClassId() == uniPi1DeviceClassId) || (parentDevice->deviceClassId() == uniPi1LiteDeviceClassId)) {
             foreach(Device *device, myDevices().filterByParam(digitalInputDeviceParentIdParamTypeId, parentDevice->id())) {
@@ -1141,41 +1143,33 @@ void DevicePluginUniPi::onUniPiDigitalInputStatusChanged(const QString &circuit,
     }
 }
 
+void DevicePluginUniPi::onUniPiDigitalInputStatusChanged(const QString &circuit, bool value)
+{
+    qDebug(dcUniPi) << "Digital Input changed" << circuit << value;
+    foreach(Device *device, myDevices()) {
+        if (device->deviceClassId() == digitalInputDeviceClassId) {
+            if (device->paramValue(digitalInputDeviceCircuitParamTypeId).toString() == circuit) {
+
+                device->setStateValue(digitalInputInputStatusStateTypeId, value);
+                return;
+            }
+        }
+    }
+}
+
 void DevicePluginUniPi::onUniPiDigitalOutputStatusChanged(const QString &circuit, bool value)
 {
-    foreach(Device *parentDevice, myDevices()) {
-        if ((parentDevice->deviceClassId() == uniPi1DeviceClassId) || (parentDevice->deviceClassId() == uniPi1LiteDeviceClassId)) {
-            foreach(Device *device, myDevices().filterByParam(digitalOutputDeviceParentIdParamTypeId, parentDevice->id())) {
-                if (device->deviceClassId() == digitalOutputDeviceClassId) {
-                    if (device->paramValue(digitalOutputDeviceCircuitParamTypeId).toString() == circuit) {
+    qDebug(dcUniPi) << "Digital Output changed" << circuit << value;
+    foreach(Device *device, myDevices()) {
+        if (device->deviceClassId() == digitalOutputDeviceClassId) {
+            if (device->paramValue(digitalOutputDeviceCircuitParamTypeId).toString() == circuit) {
 
-                        device->setStateValue(digitalOutputPowerStateTypeId, value);
-                        return;
-                    }
-                }
+                device->setStateValue(digitalOutputPowerStateTypeId, value);
+                return;
             }
-            break;
         }
     }
 }
-
-void DevicePluginUniPi::onUniPiAnalogInputStatusChanged(const QString &circuit, double value)
-{
-    foreach(Device *parentDevice, myDevices()) {
-        if ((parentDevice->deviceClassId() == uniPi1DeviceClassId) || (parentDevice->deviceClassId() == uniPi1LiteDeviceClassId)) {
-            foreach(Device *device, myDevices().filterByParam(analogInputDeviceParentIdParamTypeId, parentDevice->id())) {
-                if (device->deviceClassId() == analogInputDeviceClassId) {
-                    if (device->paramValue(analogInputDeviceCircuitParamTypeId).toString() == circuit) {
-                        device->setStateValue(analogInputInputValueStateTypeId, value);
-                        return;
-                    }
-                }
-            }
-            break;
-        }
-    }
-}
-
 
 void DevicePluginUniPi::onUniPiAnalogOutputStatusChanged(const QString &circuit, double value)
 {

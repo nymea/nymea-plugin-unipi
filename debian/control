@@ -9,7 +9,8 @@ Build-depends: debhelper (>= 9.0.0),
                nymea-dev-tools:native,
                qt5-qmake:native,
                qtbase5-dev,
-               libi2c-dev
+               libi2c-dev,
+               wiringPi
 Standards-Version: 3.9.3
 
 Package: nymea-plugin-unipi2
