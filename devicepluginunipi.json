@@ -438,12 +438,6 @@
                             "name": "circuit",
                             "displayName": "Circuit",
                             "type": "QString"
-                        },
-                        {
-                            "id": "d5ba1fe9-a93c-46e8-a162-4a9969f97806",
-                            "name": "parentId",
-                            "displayName": "Parent id",
-                            "type": "QString"
                         }
                     ],
                     "stateTypes": [
@@ -468,12 +462,6 @@
                             "id": "c01d5bde-de5d-42c5-b462-79745827875a",
                             "name": "circuit",
                             "displayName": "Circuit",
-                            "type": "QString"
-                        },
-                        {
-                            "id": "f356d835-7ad2-44c9-9cc7-2329235e6114",
-                            "name": "parentId",
-                            "displayName": "Parent id",
                             "type": "QString"
                         }
                     ],
@@ -501,12 +489,6 @@
                             "id": "46e606cc-67ee-4891-bc39-8fb0565c87da",
                             "name": "circuit",
                             "displayName": "Circuit",
-                            "type": "QString"
-                        },
-                        {
-                            "id": "384ba000-90fc-4f91-9a96-aa927359dd9b",
-                            "name": "parentId",
-                            "displayName": "Parent id",
                             "type": "QString"
                         }
                     ],
@@ -538,12 +520,6 @@
                             "name": "circuit",
                             "displayName": "Circuit",
                             "type": "QString"
-                        },
-                        {
-                            "id": "c403ffc4-db54-48d3-a10f-cfe2835e5cd3",
-                            "name": "parentId",
-                            "displayName": "Parent id",
-                            "type": "QString"
                         }
                     ],
                     "stateTypes": [
@@ -569,12 +545,6 @@
                             "id": "88fffbd6-6469-47ce-bfba-700da90a6075",
                             "name": "circuit",
                             "displayName": "Circuit",
-                            "type": "QString"
-                        },
-                        {
-                            "id": "72f566c2-31f7-4a36-83ed-1cd06a5eecc8",
-                            "name": "parentId",
-                            "displayName": "Parent id",
                             "type": "QString"
                         }
                     ],
