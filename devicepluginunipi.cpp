@@ -178,7 +178,6 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
                     }
                     ParamList params;
                     params.append(Param(analogInputDeviceCircuitParamTypeId, circuit));
-                    params.append(Param(analogInputDeviceParentIdParamTypeId, parentDevice->id()));
                     deviceDescriptor.setParams(params);
                     info->addDeviceDescriptor(deviceDescriptor);
                 }
@@ -304,7 +303,6 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
         }
         return info->finish(Device::DeviceErrorNoError);
     }
-
     qCWarning(dcUniPi()) << "Unhandled device class in discoverDevice";
 }
 
@@ -772,12 +770,12 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
             if (m_unipi) {
                 m_unipi->setAnalogOutput(analogOutputNumber, analogValue);
             }
-            if (m_neurons.contains(device->parentId().toString()) {
+            if (m_neurons.contains(device->parentId().toString())) {
                 Neuron *neuron = m_neurons.value(device->parentId().toString());
                 neuron->setAnalogOutput(analogOutputNumber, analogValue);
             }
-            if (m_neuronExtensions.contains(device->paramValue(analogOutputDeviceParentIdParamTypeId).toString())) {
-                NeuronExtension *neuronExtension = m_neuronExtensions.value(device->paramValue(analogOutputDeviceParentIdParamTypeId).toString());
+            if (m_neuronExtensions.contains(device->parentId().toString())) {
+                NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId().toString());
                 neuronExtension->setAnalogOutput(analogOutputNumber, analogValue);
             }
             return info->finish(Device::DeviceErrorNoError);
