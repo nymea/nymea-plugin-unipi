@@ -3,8 +3,7 @@ include($$[QT_INSTALL_PREFIX]/include/nymea/plugin.pri)
 TARGET = $$qtLibraryTarget(nymea_devicepluginunipi)
 
 LIBS += \
-    -li2c
-    -lwiringPi \
+    -li2c \
 
 QT += \
     network \

@@ -787,7 +787,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
         if (action.actionTypeId() == userLEDPowerActionTypeId) {
             QString userLED = device->paramValue(userLEDDeviceCircuitParamTypeId).toString();
             bool stateValue = action.param(userLEDPowerActionPowerParamTypeId).value().toBool();
-            if (m_neurons.contains(device->parentId().toString()) {
+            if (m_neurons.contains(device->parentId().toString())) {
                 Neuron *neuron = m_neurons.value(device->parentId().toString());
                 neuron->setUserLED(userLED, stateValue);
             }
@@ -799,7 +799,6 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
         }
         return info->finish(Device::DeviceErrorActionTypeNotFound);
     }
-
     qCWarning(dcUniPi()) << "Unhandled device class in executeAction";
 }
 

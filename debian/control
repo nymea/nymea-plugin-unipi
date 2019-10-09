@@ -10,7 +10,6 @@ Build-depends: debhelper (>= 9.0.0),
                qt5-qmake:native,
                qtbase5-dev,
                libi2c-dev,
-               wiringPi
 Standards-Version: 3.9.3
 
 Package: nymea-plugin-unipi2
@@ -19,6 +18,7 @@ Multi-Arch: same
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
+         wiringpi,
 Replaces: nymea-plugin-unipi
 Description: nymea.io plugin for UniPi devices
  The nymea daemon is a plugin based IoT (Internet of Things) server. The

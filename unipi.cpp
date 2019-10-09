@@ -22,7 +22,7 @@
 
 #include "unipi.h"
 #include "extern-plugininfo.h"
-#include "wiringPi.h"
+#include <QProcess>
 
 UniPi::UniPi(UniPiType unipiType, QObject *parent) :
     QObject(parent),
@@ -42,8 +42,6 @@ UniPi::~UniPi()
 
 bool UniPi::init()
 {
-    wiringPiSetup(); //Wiring Pi is needed to set the pull ups on the input pins
-
     //init MCP23008 Outputs
     if (m_mcp23008->init()) {
         m_mcp23008->writeRegister(MCP23008::RegisterAddress::IODIR, 0x00); //set all pins as outputs
@@ -60,14 +58,14 @@ bool UniPi::init()
         }
     }
 
+
     //Init Raspberry Pi Inputs
     foreach (QString circuit, digitalInputs()){
         int pin = getPinFromCircuit(circuit);
-        pullUpDnControl(pin, PUD_UP);
-        Gpio *gpio = new Gpio(pin, this);
+        QProcess::execute(QString("gpio %1 up").arg(pin));
         GpioMonitor *gpio = new GpioMonitor(pin, this);
         if (!gpio->enable()) {
-            qCWarning(dcUniPi()) << "Could not enable gpio monitor for device" << device->name();
+            qCWarning(dcUniPi()) << "Could not enable gpio monitor for pin" << pin;
             return false;
         }
         connect(gpio, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
@@ -80,6 +78,7 @@ bool UniPi::init()
             pwm->deleteLater();
         }
     }
+
     //Init Raspberry Pi PWM outputs
     foreach (QString circuit, analogOutputs()) {
         int pin = getPinFromCircuit(circuit);
