@@ -65,7 +65,7 @@ bool UniPi::init()
     //Init Raspberry Pi Inputs
     foreach (QString circuit, digitalInputs()){
         int pin = getPinFromCircuit(circuit);
-        QProcess::execute(QString("gpio mode %1 up").arg(pin));
+        QProcess::execute(QString("gpio -g mode %1 up").arg(pin));
 
         GpioMonitor *gpio = new GpioMonitor(pin, this);
         if (!gpio->enable()) {
@@ -73,6 +73,7 @@ bool UniPi::init()
             return false;
         } else {
             QTimer::singleShot(1000, [gpio, circuit, this]() {
+                emit digitalInputStatusChanged(circuit, gpio->value()); //set initial status
                 connect(gpio, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
                 m_monitorGpios.insert(gpio, circuit);
             });
