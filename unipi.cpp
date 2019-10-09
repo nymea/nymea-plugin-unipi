@@ -48,9 +48,12 @@ bool UniPi::init()
         m_mcp23008->writeRegister(MCP23008::RegisterAddress::IPOL, 0x00);  //set all pins to non inverted mode 1 = high
         m_mcp23008->writeRegister(MCP23008::RegisterAddress::GPPU, 0x00);  //disable all pull up resistors
         m_mcp23008->writeRegister(MCP23008::RegisterAddress::OLAT, 0x00);  //Set all outputs to low
-        return true;
+    } else {
+       qCWarning(dcUniPi()) << "Could not init MCP23008";
+       return false;
     }
 
+     // In case of re-init
     if (!m_monitorGpios.isEmpty()) {
         foreach (GpioMonitor *gpio, m_monitorGpios.keys()) {
             m_monitorGpios.remove(gpio);
@@ -58,11 +61,11 @@ bool UniPi::init()
         }
     }
 
-
     //Init Raspberry Pi Inputs
     foreach (QString circuit, digitalInputs()){
         int pin = getPinFromCircuit(circuit);
-        QProcess::execute(QString("gpio %1 up").arg(pin));
+        QProcess::execute(QString("gpio mode %1 up").arg(pin));
+
         GpioMonitor *gpio = new GpioMonitor(pin, this);
         if (!gpio->enable()) {
             qCWarning(dcUniPi()) << "Could not enable gpio monitor for pin" << pin;
@@ -72,6 +75,7 @@ bool UniPi::init()
         m_monitorGpios.insert(gpio, circuit);
     }
 
+    // In case of re-init
     if (!m_pwms.isEmpty()) {
         foreach (Pwm *pwm, m_pwms.keys()) {
             m_pwms.remove(pwm);
@@ -95,7 +99,7 @@ bool UniPi::init()
         Q_UNUSED(pin)
         //TODO Init Raspberry Pi Analog Input
     }
-    return false;
+    return true;
 }
 
 QString UniPi::type()

@@ -48,6 +48,7 @@ public:
 
     void discoverDevices(DeviceDiscoveryInfo *info) override;
     void setupDevice(DeviceSetupInfo *info) override;
+    void postSetupDevice(Device *device) override;
     void executeAction(DeviceActionInfo *info) override;
     void deviceRemoved(Device *device) override;
 

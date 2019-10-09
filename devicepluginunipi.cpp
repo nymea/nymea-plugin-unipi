@@ -310,22 +310,15 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 {
     Device *device = info->device();
 
-    if (!m_reconnectTimer) {
-        m_reconnectTimer = new QTimer(this);
-        m_reconnectTimer->setSingleShot(true);
-        connect(m_reconnectTimer, &QTimer::timeout, this, &DevicePluginUniPi::onReconnectTimer);
-    }
-
-
     if(device->deviceClassId() == uniPi1DeviceClassId) {
         if (m_unipi)
-            return info->finish(Device::DeviceErrorDeviceInUse, QT_TR_NOOP("There is already a UniPi gateway in the system.")); //only one parent device allowed
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("There is already a UniPi gateway in the system.")); //only one parent device allowed
 
         m_unipi = new UniPi(UniPi::UniPiType::UniPi1, this);
         if (!m_unipi->init()) {
             qCWarning(dcUniPi()) << "Could not setup UniPi";
             m_unipi->deleteLater();
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up UniPi."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up UniPi."));
         }
         connect(m_unipi, &UniPi::digitalInputStatusChanged, this, &DevicePluginUniPi::onUniPiDigitalInputStatusChanged);
         connect(m_unipi, &UniPi::digitalOutputStatusChanged, this, &DevicePluginUniPi::onUniPiDigitalOutputStatusChanged);
@@ -337,13 +330,13 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
     }
     if(device->deviceClassId() == uniPi1LiteDeviceClassId) {
         if (m_unipi)
-            return info->finish(Device::DeviceErrorDeviceInUse, QT_TR_NOOP("There is already a UniPi Lite gateway in the system.")); //only one parent device allowed
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("There is already a UniPi Lite gateway in the system.")); //only one parent device allowed
 
         m_unipi = new UniPi(UniPi::UniPiType::UniPi1Lite, this);
         if (!m_unipi->init()) {
             qCWarning(dcUniPi()) << "Could not setup UniPi";
             m_unipi->deleteLater();
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up UniPi."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up UniPi."));
         }
         connect(m_unipi, &UniPi::digitalInputStatusChanged, this, &DevicePluginUniPi::onUniPiDigitalInputStatusChanged);
         connect(m_unipi, &UniPi::digitalOutputStatusChanged, this, &DevicePluginUniPi::onUniPiDigitalOutputStatusChanged);
@@ -355,13 +348,13 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
     }
     if(device->deviceClassId() == neuronS103DeviceClassId) {
         if (!neuronDeviceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::S103, m_modbusTCPMaster, this);
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron device."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron device."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -377,7 +370,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronM103DeviceClassId) {
         if (!neuronDeviceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::M103, m_modbusTCPMaster, this);
         if (!neuron->init()) {
@@ -399,7 +392,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronM203DeviceClassId) {
         if (!neuronDeviceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::M203, m_modbusTCPMaster, this);
         if (!neuron->init()) {
@@ -443,7 +436,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronM403DeviceClassId) {
         if (!neuronDeviceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::M403, m_modbusTCPMaster, this);
         if (!neuron->init()) {
@@ -465,7 +458,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronM503DeviceClassId) {
         if (!neuronDeviceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::M503, m_modbusTCPMaster, this);
         if (!neuron->init()) {
@@ -487,7 +480,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronL203DeviceClassId) {
         if (!neuronDeviceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::L203, m_modbusTCPMaster, this);
         if (!neuron->init()) {
@@ -509,7 +502,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronL303DeviceClassId) {
         if (!neuronDeviceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::L303, m_modbusTCPMaster, this);
         if (!neuron->init()) {
@@ -531,7 +524,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronL403DeviceClassId) {
         if (!neuronDeviceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::L403, m_modbusTCPMaster, this);
         if (!neuron->init()) {
@@ -553,7 +546,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronL503DeviceClassId) {
         if (!neuronDeviceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::L503, m_modbusTCPMaster, this);
         if (!neuron->init()) {
@@ -575,7 +568,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronL513DeviceClassId) {
         if (!neuronDeviceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         Neuron *neuron = new Neuron(Neuron::NeuronTypes::L513, m_modbusTCPMaster, this);
         if (!neuron->init()) {
@@ -597,7 +590,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronXS10DeviceClassId) {
         if (!neuronExtensionInterfaceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         int slaveAddress = device->paramValue(neuronXS10DeviceSlaveAddressParamTypeId).toInt();
         NeuronExtension *neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS10, m_modbusRTUMaster, slaveAddress, this);
@@ -620,7 +613,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronXS20DeviceClassId) {
         if (!neuronExtensionInterfaceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         int slaveAddress = device->paramValue(neuronXS20DeviceSlaveAddressParamTypeId).toInt();
         NeuronExtension *neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS20, m_modbusRTUMaster, slaveAddress, this);
@@ -643,7 +636,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronXS30DeviceClassId) {
         if (!neuronExtensionInterfaceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         int slaveAddress = device->paramValue(neuronXS30DeviceSlaveAddressParamTypeId).toInt();
         NeuronExtension *neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS30, m_modbusRTUMaster, slaveAddress, this);
@@ -666,7 +659,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronXS40DeviceClassId) {
         if (!neuronExtensionInterfaceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         int slaveAddress = device->paramValue(neuronXS40DeviceSlaveAddressParamTypeId).toInt();
         NeuronExtension *neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS40, m_modbusRTUMaster, slaveAddress, this);
@@ -689,7 +682,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
 
     if(device->deviceClassId() == neuronXS50DeviceClassId) {
         if (!neuronExtensionInterfaceInit())
-            return info->finish(Device::DeviceErrorHardwareFailure, QT_TR_NOOP("Error setting up Neuron."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
         int slaveAddress = device->paramValue(neuronXS50DeviceSlaveAddressParamTypeId).toInt();
         NeuronExtension *neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS50, m_modbusRTUMaster, slaveAddress, this);
@@ -731,6 +724,17 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
     }
 
     qCWarning(dcUniPi()) << "Unhandled device class in setupDevice";
+}
+
+void DevicePluginUniPi::postSetupDevice(Device *device)
+{
+    Q_UNUSED(device)
+
+    if (!m_reconnectTimer) {
+        m_reconnectTimer = new QTimer(this);
+        m_reconnectTimer->setSingleShot(true);
+        connect(m_reconnectTimer, &QTimer::timeout, this, &DevicePluginUniPi::onReconnectTimer);
+    }
 }
 
 
@@ -823,8 +827,10 @@ void DevicePluginUniPi::deviceRemoved(Device *device)
     }
 
     if (myDevices().isEmpty()) {
-        m_reconnectTimer->stop();
-        m_reconnectTimer->deleteLater();
+        if (m_reconnectTimer) {
+            m_reconnectTimer->deleteLater();
+            m_reconnectTimer = nullptr;
+        }
 
         if (m_modbusTCPMaster) {
             m_modbusTCPMaster->disconnectDevice();
