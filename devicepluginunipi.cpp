@@ -1137,6 +1137,19 @@ void DevicePluginUniPi::onUniPiDigitalOutputStatusChanged(const QString &circuit
     }
 }
 
+void DevicePluginUniPi::onUniPiAnalogInputStatusChanged(const QString &circuit, double value)
+{
+     qDebug(dcUniPi) << "Digital Input changed" << circuit << value;
+     foreach(Device *device, myDevices()) {
+         if (device->deviceClassId() == analogInputDeviceClassId) {
+             if (device->paramValue(analogInputDeviceCircuitParamTypeId).toString() == circuit) {
+                 device->setStateValue(analogInputInputValueStateTypeId, value);
+                 return;
+             }
+         }
+     }
+}
+
 void DevicePluginUniPi::onUniPiAnalogOutputStatusChanged(const QString &circuit, double value)
 {
     foreach(Device *parentDevice, myDevices()) {
