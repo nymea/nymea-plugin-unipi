@@ -23,6 +23,7 @@
 #include "unipi.h"
 #include "extern-plugininfo.h"
 #include <QProcess>
+#include <QTimer>
 
 UniPi::UniPi(UniPiType unipiType, QObject *parent) :
     QObject(parent),
@@ -70,9 +71,12 @@ bool UniPi::init()
         if (!gpio->enable()) {
             qCWarning(dcUniPi()) << "Could not enable gpio monitor for pin" << pin;
             return false;
+        } else {
+            QTimer::singleShot(1000, [gpio, circuit, this]() {
+                connect(gpio, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
+                m_monitorGpios.insert(gpio, circuit);
+            });
         }
-        connect(gpio, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
-        m_monitorGpios.insert(gpio, circuit);
     }
 
     // In case of re-init
