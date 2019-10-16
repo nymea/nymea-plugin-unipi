@@ -397,7 +397,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -419,7 +419,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -441,7 +441,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -463,7 +463,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -485,7 +485,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -507,7 +507,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -529,7 +529,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -551,7 +551,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -573,7 +573,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -595,7 +595,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         m_neurons.insert(device->id(), neuron);
         connect(neuron, &Neuron::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronDigitalInputStatusChanged);
@@ -618,7 +618,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         connect(neuronExtension, &NeuronExtension::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalInputStatusChanged);
         connect(neuronExtension, &NeuronExtension::digitalOutputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalOutputStatusChanged);
@@ -641,7 +641,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         connect(neuronExtension, &NeuronExtension::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalInputStatusChanged);
         connect(neuronExtension, &NeuronExtension::digitalOutputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalOutputStatusChanged);
@@ -664,7 +664,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         connect(neuronExtension, &NeuronExtension::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalInputStatusChanged);
         connect(neuronExtension, &NeuronExtension::digitalOutputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalOutputStatusChanged);
@@ -687,7 +687,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         connect(neuronExtension, &NeuronExtension::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalInputStatusChanged);
         connect(neuronExtension, &NeuronExtension::digitalOutputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalOutputStatusChanged);
@@ -710,7 +710,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         connect(neuronExtension, &NeuronExtension::digitalInputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalInputStatusChanged);
         connect(neuronExtension, &NeuronExtension::digitalOutputStatusChanged, this, &DevicePluginUniPi::onNeuronExtensionDigitalOutputStatusChanged);
