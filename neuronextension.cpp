@@ -249,13 +249,15 @@ bool NeuronExtension::getDigitalInput(const QString &circuit)
 }
 
 
-bool NeuronExtension::setDigitalOutput(const QString &circuit, bool value)
+QUuid NeuronExtension::setDigitalOutput(const QString &circuit, bool value)
 {
     int modbusAddress = m_modbusDigitalOutputRegisters.value(circuit);
     //qDebug(dcUniPi()) << "Setting digital ouput" << circuit << modbusAddress;
 
     if (!m_modbusInterface)
-        return false;
+        return "";
+
+    QUuid requestId = QUuid::createUuid();
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
     request.setValue(0, static_cast<uint16_t>(value));
@@ -267,11 +269,13 @@ bool NeuronExtension::setDigitalOutput(const QString &circuit, bool value)
             QTimer::singleShot(200, reply, SLOT(deleteLater()));
         } else {
             delete reply; // broadcast replies return immediately
+            return "";
         }
     } else {
         qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        return "";
     }
-    return true;
+    return requestId;
 }
 
 bool NeuronExtension::getDigitalOutput(const QString &circuit)
@@ -399,11 +403,13 @@ bool NeuronExtension::getAllDigitalOutputs()
     return true;
 }
 
-bool NeuronExtension::setAnalogOutput(const QString &circuit, double value)
+QUuid NeuronExtension::setAnalogOutput(const QString &circuit, double value)
 {
     int modbusAddress = m_modbusAnalogOutputRegisters.value(circuit);
     if (!m_modbusInterface)
-        return false;
+        return "";
+
+    QUuid requestId = QUuid::createUuid();
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, modbusAddress, 2);
     request.setValue(0, static_cast<uint16_t>(value));
@@ -416,11 +422,13 @@ bool NeuronExtension::setAnalogOutput(const QString &circuit, double value)
             QTimer::singleShot(200, reply, SLOT(deleteLater()));
         } else {
             delete reply; // broadcast replies return immediately
+            return "";
         }
     } else {
         qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        return "";
     }
-    return true;
+    return requestId;
 }
 
 
@@ -443,6 +451,7 @@ bool NeuronExtension::getAnalogOutput(const QString &circuit)
         }
     } else {
         qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        return false;
     }
     return true;
 }
@@ -467,17 +476,20 @@ bool NeuronExtension::getAnalogInput(const QString &circuit)
         }
     } else {
         qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        return false;
     }
     return true;
 }
 
-bool NeuronExtension::setUserLED(const QString &circuit, bool value)
+QUuid NeuronExtension::setUserLED(const QString &circuit, bool value)
 {
     int modbusAddress = m_modbusUserLEDRegisters.value(circuit);
     //qDebug(dcUniPi()) << "Setting digital ouput" << circuit << modbusAddress << value;
 
     if (!m_modbusInterface)
-        return false;
+        return "";
+
+    QUuid requestId = QUuid::createUuid();
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
     request.setValue(0, static_cast<uint16_t>(value));
@@ -489,11 +501,13 @@ bool NeuronExtension::setUserLED(const QString &circuit, bool value)
             QTimer::singleShot(200, reply, SLOT(deleteLater()));
         } else {
             delete reply; // broadcast replies return immediately
+            return "";
         }
     } else {
         qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        return "";
     }
-    return true;
+    return requestId;
 }
 
 

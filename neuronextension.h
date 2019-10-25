@@ -5,6 +5,7 @@
 #include <QHash>
 #include <QTimer>
 #include <QtSerialBus>
+#include <QUuid>
 
 class NeuronExtension : public QObject
 {
@@ -33,18 +34,18 @@ public:
     QList<QString> analogOutputs();
     QList<QString> userLEDs();
 
-    bool setDigitalOutput(const QString &circuit, bool value);
+    QUuid setDigitalOutput(const QString &circuit, bool value);
     bool getDigitalOutput(const QString &circuit);
     bool getDigitalInput(const QString &circuit);
 
-    bool setAnalogOutput(const QString &circuit, double value);
+    QUuid setAnalogOutput(const QString &circuit, double value);
     bool getAnalogOutput(const QString &circuit);
     bool getAnalogInput(const QString &circuit);
 
     bool getAllDigitalOutputs();
     bool getAllDigitalInputs();
 
-    bool setUserLED(const QString &circuit, bool value);
+    QUuid setUserLED(const QString &circuit, bool value);
     bool getUserLED(const QString &circuit);
 private:
 
@@ -65,6 +66,8 @@ private:
     bool loadModbusMap();
 
 signals:
+    void requestExecuted(QUuid requestId, bool success);
+    void requestError(QUuid requestId, const QString &error);
     void digitalInputStatusChanged(QString &circuit, bool value);
     void digitalOutputStatusChanged(QString &circuit, bool value);
 
