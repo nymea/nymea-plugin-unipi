@@ -39,7 +39,7 @@ DevicePluginUniPi::DevicePluginUniPi()
 void DevicePluginUniPi::init()
 {
     connect(this, &DevicePluginUniPi::configValueChanged, this, &DevicePluginUniPi::onPluginConfigurationChanged);
-    QLoggingCategory::setFilterRules(QStringLiteral("qt.modbus* = false"));
+    //QLoggingCategory::setFilterRules(QStringLiteral("qt.modbus* = false"));
 
     m_connectionStateTypeIds.insert(uniPi1DeviceClassId, uniPi1ConnectedStateTypeId);
     m_connectionStateTypeIds.insert(uniPi1LiteDeviceClassId, uniPi1LiteConnectedStateTypeId);

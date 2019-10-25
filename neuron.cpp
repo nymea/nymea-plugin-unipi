@@ -435,8 +435,28 @@ QUuid Neuron::setDigitalOutput(const QString &circuit, bool value)
 
     if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, this, &Neuron::onFinished);
-            connect(reply, &QModbusReply::errorOccurred, this, &Neuron::onErrorOccured);
+            connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
+
+                if (reply->error() == QModbusDevice::NoError) {
+                    requestExecuted(requestId, true);
+                    const QModbusDataUnit unit = reply->result();
+                    int modbusAddress = unit.startAddress();
+                    if(m_modbusDigitalOutputRegisters.values().contains(modbusAddress)){
+                        QString circuit = m_modbusDigitalOutputRegisters.key(modbusAddress);
+                        emit digitalOutputStatusChanged(circuit, unit.value(0));
+                    }
+                } else {
+                    requestExecuted(requestId, false);
+                    qCWarning(dcUniPi()) << "Read response error:" << reply->error();
+                }
+                reply->deleteLater();
+            });
+            connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
+
+                qCWarning(dcUniPi()) << "Modbus replay error:" << error;
+                emit requestError(requestId, reply->errorString());
+                reply->finished(); // To make sure it will be deleted
+            });
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -498,7 +518,7 @@ QUuid Neuron::setAnalogOutput(const QString &circuit, double value)
                     int modbusAddress = unit.startAddress();
                     if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
                         QString circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
-                        emit digitalOutputStatusChanged(circuit, unit.value(0));
+                        emit analogOutputStatusChanged(circuit, unit.value(0));
                     }
                 } else {
                     requestExecuted(requestId, false);
