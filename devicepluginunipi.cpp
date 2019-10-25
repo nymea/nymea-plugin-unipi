@@ -39,7 +39,7 @@ DevicePluginUniPi::DevicePluginUniPi()
 void DevicePluginUniPi::init()
 {
     connect(this, &DevicePluginUniPi::configValueChanged, this, &DevicePluginUniPi::onPluginConfigurationChanged);
-    //QLoggingCategory::setFilterRules(QStringLiteral("qt.modbus* = false"));
+    QLoggingCategory::setFilterRules(QStringLiteral("qt.modbus* = false"));
 
     m_connectionStateTypeIds.insert(uniPi1DeviceClassId, uniPi1ConnectedStateTypeId);
     m_connectionStateTypeIds.insert(uniPi1LiteDeviceClassId, uniPi1LiteConnectedStateTypeId);
@@ -528,6 +528,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                 } else {
                     m_asyncActions.insert(requestId, info);
                 }
+                return;
             }
             return info->finish(Device::DeviceErrorNoError);
         }
@@ -551,6 +552,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                 } else {
                     m_asyncActions.insert(requestId, info);
                 }
+                return;
             }
             if (m_neuronExtensions.contains(device->parentId().toString())) {
                 NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId().toString());
@@ -560,6 +562,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                 } else {
                     m_asyncActions.insert(requestId, info);
                 }
+                return;
             }
             return info->finish(Device::DeviceErrorNoError);
         }
@@ -578,6 +581,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                 } else {
                     m_asyncActions.insert(requestId, info);
                 }
+                return;
             }
             if (m_neuronExtensions.contains(device->parentId().toString())) {
                 NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId().toString());
@@ -587,6 +591,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                 } else {
                     m_asyncActions.insert(requestId, info);
                 }
+                return;
             }
             return info->finish(Device::DeviceErrorNoError);
         }
@@ -598,7 +603,6 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
 
 void DevicePluginUniPi::deviceRemoved(Device *device)
 {
-    Q_UNUSED(device);
     if(m_neurons.contains(device->id())) {
         Neuron *neuron = m_neurons.take(device->id());
         neuron->deleteLater();
@@ -617,6 +621,7 @@ void DevicePluginUniPi::deviceRemoved(Device *device)
 
     if (myDevices().isEmpty()) {
         if (m_reconnectTimer) {
+            m_reconnectTimer->stop();
             m_reconnectTimer->deleteLater();
             m_reconnectTimer = nullptr;
         }
@@ -863,55 +868,38 @@ void DevicePluginUniPi::onReconnectTimer()
 {
     if(m_modbusRTUMaster) {
         if (!m_modbusRTUMaster->connectDevice()) {
-            m_reconnectTimer->start(10000);
+            if (m_reconnectTimer)
+                m_reconnectTimer->start(10000);
         }
     }
     if(m_modbusTCPMaster) {
         if (!m_modbusTCPMaster->connectDevice()) {
-            m_reconnectTimer->start(10000);
+            if (m_reconnectTimer)
+                m_reconnectTimer->start(10000);
         }
     }
 }
 
-
-void DevicePluginUniPi::onModbusTCPErrorOccurred(QModbusDevice::Error error)
-{
-    qCWarning(dcUniPi()) << "An error occured" << error;
-}
-
-void DevicePluginUniPi::onModbusRTUErrorOccurred(QModbusDevice::Error error)
-{
-    qCWarning(dcUniPi()) << "An error occured" << error;
-}
-
 void DevicePluginUniPi::onModbusTCPStateChanged(QModbusDevice::State state)
 {
-    bool connected = (state != QModbusDevice::UnconnectedState);
-
-    foreach (DeviceId deviceId, m_neurons.keys()) {
-        Device *device = myDevices().findById(deviceId);
-        device->setStateValue(m_connectionStateTypeIds.value(device->deviceClassId()), connected);
-    }
+    bool connected = (state == QModbusDevice::State::ConnectedState);
 
     if (!connected) {
         //try to reconnect in 10 seconds
-        m_reconnectTimer->start(10000);
+        if (m_reconnectTimer)
+            m_reconnectTimer->start(10000);
     }
     qCDebug(dcUniPi()) << "Connection status changed:" << connected;
 }
 
 void DevicePluginUniPi::onModbusRTUStateChanged(QModbusDevice::State state)
 {
-    bool connected = (state != QModbusDevice::UnconnectedState);
-
-    foreach (DeviceId deviceId, m_neurons.keys()) {
-        Device *device = myDevices().findById(deviceId);
-        device->setStateValue(m_connectionStateTypeIds.value(device->deviceClassId()), connected);
-    }
+    bool connected = (state == QModbusDevice::State::ConnectedState);
 
     if (!connected) {
         //try to reconnect in 10 seconds
-        m_reconnectTimer->start(10000);
+        if (m_reconnectTimer)
+            m_reconnectTimer->start(10000);
     }
     qCDebug(dcUniPi()) << "Connection status changed:" << connected;
 }
@@ -988,7 +976,6 @@ bool DevicePluginUniPi::neuronDeviceInit()
         //m_modbusTCPMaster->setNumberOfRetries(1);
 
         connect(m_modbusTCPMaster, &QModbusTcpClient::stateChanged, this, &DevicePluginUniPi::onModbusTCPStateChanged);
-        connect(m_modbusTCPMaster, &QModbusTcpClient::errorOccurred, this, &DevicePluginUniPi::onModbusTCPErrorOccurred);
 
         if (!m_modbusTCPMaster->connectDevice()) {
             qCWarning(dcUniPi()) << "Connect failed:" << m_modbusTCPMaster->errorString();
@@ -1019,7 +1006,6 @@ bool DevicePluginUniPi::neuronExtensionInterfaceInit()
         //m_modbusRTUMaster->setNumberOfRetries(1);
 
         connect(m_modbusRTUMaster, &QModbusRtuSerialMaster::stateChanged, this, &DevicePluginUniPi::onModbusRTUStateChanged);
-        connect(m_modbusRTUMaster, &QModbusRtuSerialMaster::errorOccurred, this, &DevicePluginUniPi::onModbusRTUErrorOccurred);
 
         if (!m_modbusRTUMaster->connectDevice()) {
             qCWarning(dcUniPi()) << "Connect failed:" << m_modbusRTUMaster->errorString();

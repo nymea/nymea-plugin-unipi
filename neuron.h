@@ -78,8 +78,8 @@ public:
 private:
     int m_slaveAddress = 0;
 
-    QTimer m_inputPollingTimer;
-    QTimer m_outputPollingTimer;
+    QTimer *m_inputPollingTimer = nullptr;
+    QTimer *m_outputPollingTimer = nullptr;
 
     QModbusTcpClient *m_modbusInterface = nullptr;
 

@@ -90,8 +90,6 @@ private slots:
 
     void onReconnectTimer();
 
-    void onModbusTCPErrorOccurred(QModbusDevice::Error error);
-    void onModbusRTUErrorOccurred(QModbusDevice::Error error);
     void onModbusTCPStateChanged(QModbusDevice::State state);
     void onModbusRTUStateChanged(QModbusDevice::State state);
 

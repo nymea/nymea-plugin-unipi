@@ -34,20 +34,44 @@ NeuronExtension::NeuronExtension(ExtensionTypes extensionType, QModbusRtuSerialM
     m_slaveAddress(slaveAddress),
     m_extensionType(extensionType)
 {
-    connect(&m_inputPollingTimer, &QTimer::timeout, this, &NeuronExtension::onInputPollingTimer);
-    m_inputPollingTimer.setTimerType(Qt::TimerType::PreciseTimer);
-    m_inputPollingTimer.start(200);
+    m_inputPollingTimer = new QTimer(this);
+    connect(m_inputPollingTimer, &QTimer::timeout, this, &NeuronExtension::onInputPollingTimer);
+    m_inputPollingTimer->setTimerType(Qt::TimerType::PreciseTimer);
+    m_inputPollingTimer->setInterval(200);
 
-    connect(&m_outputPollingTimer, &QTimer::timeout, this, &NeuronExtension::onOutputPollingTimer);
-    m_outputPollingTimer.setTimerType(Qt::TimerType::PreciseTimer);
-    m_outputPollingTimer.start(1000);
+    m_outputPollingTimer = new QTimer(this);
+    connect(m_outputPollingTimer, &QTimer::timeout, this, &NeuronExtension::onOutputPollingTimer);
+    m_outputPollingTimer->setTimerType(Qt::TimerType::PreciseTimer);
+    m_outputPollingTimer->setInterval(1000);
+
+    connect(m_modbusInterface, &QModbusDevice::stateChanged, this, [this] (QModbusDevice::State state) {
+        if (state == QModbusDevice::State::ConnectedState) {
+            if (m_inputPollingTimer)
+                m_inputPollingTimer->start();
+            if (m_outputPollingTimer)
+                m_outputPollingTimer->start();
+            emit connectionStateChanged(true);
+        } else {
+            if (m_inputPollingTimer)
+                m_inputPollingTimer->stop();
+            if (m_outputPollingTimer)
+                m_outputPollingTimer->stop();
+            emit connectionStateChanged(false);
+        }
+    });
 }
 
 NeuronExtension::~NeuronExtension(){
-    m_inputPollingTimer.stop();
-    m_inputPollingTimer.deleteLater();
-    m_outputPollingTimer.stop();
-    m_outputPollingTimer.deleteLater();
+    if (m_inputPollingTimer) {
+        m_inputPollingTimer->stop();
+        m_inputPollingTimer->deleteLater();
+        m_inputPollingTimer = nullptr;
+    }
+    if (m_outputPollingTimer) {
+        m_outputPollingTimer->stop();
+        m_outputPollingTimer->deleteLater();
+        m_outputPollingTimer = nullptr;
+    }
 }
 
 bool NeuronExtension::init() {
@@ -58,10 +82,12 @@ bool NeuronExtension::init() {
 
     if (!m_modbusInterface) {
         qWarning(dcUniPi()) << "Modbus RTU interface not available";
+        return false;
     }
 
     if (m_modbusInterface->connectDevice()) {
         qWarning(dcUniPi()) << "Could not connect to RTU device";
+        return  false;
     }
     return true;
 }
@@ -244,6 +270,7 @@ bool NeuronExtension::getDigitalInput(const QString &circuit)
         }
     } else {
         qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        return  false;
     }
     return true;
 }
@@ -318,6 +345,7 @@ bool NeuronExtension::getDigitalOutput(const QString &circuit)
         }
     } else {
         qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        return false;
     }
     return true;
 }
@@ -368,6 +396,7 @@ bool NeuronExtension::getAllDigitalInputs()
             }
         } else {
             qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+            return false;
         }
     }
     return true;
@@ -418,6 +447,7 @@ bool NeuronExtension::getAllDigitalOutputs()
             }
         } else {
             qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+            return false;
         }
     }
     return true;
@@ -431,7 +461,7 @@ QUuid NeuronExtension::setAnalogOutput(const QString &circuit, double value)
 
     QUuid requestId = QUuid::createUuid();
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, modbusAddress, 2);
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 2);
     request.setValue(0, static_cast<uint16_t>(value));
     //TODO cast double to 2 uint16_t
 
@@ -479,13 +509,13 @@ bool NeuronExtension::getAnalogOutput(const QString &circuit)
     if (!m_modbusInterface)
         return false;
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, modbusAddress, 1);
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
 
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &NeuronExtension::onFinished);
             connect(reply, &QModbusReply::errorOccurred, this, &NeuronExtension::onErrorOccured);
-            QTimer::singleShot(200, reply, SLOT(deleteLater()));
+            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
         }
@@ -510,7 +540,7 @@ bool NeuronExtension::getAnalogInput(const QString &circuit)
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &NeuronExtension::onFinished);
             connect(reply, &QModbusReply::errorOccurred, this, &NeuronExtension::onErrorOccured);
-            QTimer::singleShot(200, reply, SLOT(deleteLater()));
+            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
         }
@@ -656,8 +686,6 @@ void NeuronExtension::onFinished()
                 }
                 break;
 
-            case QModbusDataUnit::RegisterType::DiscreteInputs:
-                break;
             case QModbusDataUnit::RegisterType::InputRegisters:
                 if(m_modbusAnalogInputRegisters.values().contains(modbusAddress)){
                     circuit = m_modbusAnalogInputRegisters.key(modbusAddress);
@@ -670,6 +698,7 @@ void NeuronExtension::onFinished()
                 }
                 break;
             case QModbusDataUnit::RegisterType::HoldingRegisters:
+            case QModbusDataUnit::RegisterType::DiscreteInputs:
                 break;
             case QModbusDataUnit::RegisterType::Invalid:
                 qCWarning(dcUniPi()) << "Invalide register type";
@@ -687,7 +716,7 @@ void NeuronExtension::onFinished()
 
 void NeuronExtension::onErrorOccured(QModbusDevice::Error error)
 {
-    qCWarning(dcUniPi()) << "Modbus replay error:" << error;
+    Q_UNUSED(error)
     QModbusReply *reply = qobject_cast<QModbusReply *>(sender());
     if (!reply)
         return;
