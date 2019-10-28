@@ -1,5 +1,10 @@
-nymea-plugin-unipi2 (0.1.0) UNRELEASED; urgency=medium
+nymea-plugin-unipi2 (0.1.0) xenial; urgency=medium
 
+  [ Michael Zanetti ]
   * Initial release.
 
- -- Michael Zanetti <michael.zanetti@nymea.io>  Mon, 16 Sep 2019 10:12:00 +0000
+  [ Bernhard Trinnes ]
+  * New Plugin: UniPi
+  * Fixed timer segfault
+
+ -- Jenkins <jenkins@nymea.io>  Mon, 28 Oct 2019 15:01:17 +0100
