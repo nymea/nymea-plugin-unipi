@@ -33,6 +33,7 @@
 #include <QTimer>
 #include <QtSerialBus>
 #include <QHostAddress>
+#include <QUuid>
 
 class DevicePluginUniPi : public DevicePlugin
 {
@@ -46,9 +47,10 @@ public:
     explicit DevicePluginUniPi();
     void init() override;
 
-    Device::DeviceError discoverDevices(const DeviceClassId &deviceClassId, const ParamList &params) override;
-    Device::DeviceSetupStatus setupDevice(Device *device) override;
-    Device::DeviceError executeAction(Device *device, const Action &action) override;
+    void discoverDevices(DeviceDiscoveryInfo *info) override;
+    void setupDevice(DeviceSetupInfo *info) override;
+    void postSetupDevice(Device *device) override;
+    void executeAction(DeviceActionInfo *info) override;
     void deviceRemoved(Device *device) override;
 
 private:
@@ -60,18 +62,26 @@ private:
 
     QHash<Device *, QTimer *> m_unlatchTimer;
     QTimer *m_reconnectTimer = nullptr;
+    QHash<QUuid, DeviceActionInfo *> m_asyncActions;
+    QHash<DeviceClassId, StateTypeId> m_connectionStateTypeIds;
 
     bool neuronDeviceInit();
     bool neuronExtensionInterfaceInit();
+
 private slots:
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
 
+    void onRequestExecuted(QUuid requestId, bool success);
+    void onRequestError(QUuid requestId, const QString &error);
+
+    void onNeuronConnectionStateChanged(bool state);
     void onNeuronDigitalInputStatusChanged(QString &circuit, bool value);
     void onNeuronDigitalOutputStatusChanged(QString &circuit, bool value);
     void onNeuronAnalogInputStatusChanged(QString &circuit, double value);
     void onNeuronAnalogOutputStatusChanged(QString &circuit,double value);
     void onNeuronUserLEDStatusChanged(QString &circuit, bool value);
 
+    void onNeuronExtensionConnectionStateChanged(bool state);
     void onNeuronExtensionDigitalInputStatusChanged(QString &circuit, bool value);
     void onNeuronExtensionDigitalOutputStatusChanged(QString &circuit, bool value);
     void onNeuronExtensionAnalogInputStatusChanged(QString &circuit, double value);
@@ -80,8 +90,6 @@ private slots:
 
     void onReconnectTimer();
 
-    void onModbusTCPErrorOccurred(QModbusDevice::Error error);
-    void onModbusRTUErrorOccurred(QModbusDevice::Error error);
     void onModbusTCPStateChanged(QModbusDevice::State state);
     void onModbusRTUStateChanged(QModbusDevice::State state);
 

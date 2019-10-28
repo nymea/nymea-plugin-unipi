@@ -27,6 +27,7 @@
 #include <QHash>
 #include <QTimer>
 #include <QtSerialBus>
+#include <QUuid>
 
 class Neuron : public QObject
 {
@@ -59,24 +60,26 @@ public:
     QList<QString> analogOutputs();
     QList<QString> userLEDs();
 
-    bool setDigitalOutput(const QString &circuit, bool value);
+    QUuid setDigitalOutput(const QString &circuit, bool value);
+    QUuid setAnalogOutput(const QString &circuit, double value);
+    QUuid setUserLED(const QString &circuit, bool value);
+
     bool getDigitalOutput(const QString &circuit);
     bool getDigitalInput(const QString &circuit);
 
-    bool setAnalogOutput(const QString &circuit, double value);
+
     bool getAnalogOutput(const QString &circuit);
     bool getAnalogInput(const QString &circuit);
 
     bool getAllDigitalOutputs();
     bool getAllDigitalInputs();
 
-    bool setUserLED(const QString &circuit, bool value);
     bool getUserLED(const QString &circuit);
 private:
     int m_slaveAddress = 0;
 
-    QTimer m_inputPollingTimer;
-    QTimer m_outputPollingTimer;
+    QTimer *m_inputPollingTimer = nullptr;
+    QTimer *m_outputPollingTimer = nullptr;
 
     QModbusTcpClient *m_modbusInterface = nullptr;
 
@@ -93,6 +96,8 @@ private:
     bool loadModbusMap();
 
 signals:
+    void requestExecuted(QUuid requestId, bool success);
+    void requestError(QUuid requestId, const QString &error);
     void digitalInputStatusChanged(QString &circuit, bool value);
     void digitalOutputStatusChanged(QString &circuit, bool value);
     void analogInputStatusChanged(QString &circuit, double value);

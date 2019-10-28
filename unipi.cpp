@@ -22,7 +22,8 @@
 
 #include "unipi.h"
 #include "extern-plugininfo.h"
-
+#include <QProcess>
+#include <QTimer>
 
 UniPi::UniPi(UniPiType unipiType, QObject *parent) :
     QObject(parent),
@@ -48,16 +49,43 @@ bool UniPi::init()
         m_mcp23008->writeRegister(MCP23008::RegisterAddress::IPOL, 0x00);  //set all pins to non inverted mode 1 = high
         m_mcp23008->writeRegister(MCP23008::RegisterAddress::GPPU, 0x00);  //disable all pull up resistors
         m_mcp23008->writeRegister(MCP23008::RegisterAddress::OLAT, 0x00);  //Set all outputs to low
-        return true;
+    } else {
+       qCWarning(dcUniPi()) << "Could not init MCP23008";
+       return false;
+    }
+
+     // In case of re-init
+    if (!m_monitorGpios.isEmpty()) {
+        foreach (GpioMonitor *gpio, m_monitorGpios.keys()) {
+            m_monitorGpios.remove(gpio);
+            gpio->deleteLater();
+        }
     }
 
     //Init Raspberry Pi Inputs
     foreach (QString circuit, digitalInputs()){
         int pin = getPinFromCircuit(circuit);
+        QProcess::execute(QString("gpio -g mode %1 up").arg(pin));
+
         GpioMonitor *gpio = new GpioMonitor(pin, this);
-        gpio->enable();
-        connect(gpio, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
-        m_monitorGpios.insert(gpio, circuit);
+        if (!gpio->enable()) {
+            qCWarning(dcUniPi()) << "Could not enable gpio monitor for pin" << pin;
+            return false;
+        } else {
+            QTimer::singleShot(1000, [gpio, circuit, this]() {
+                emit digitalInputStatusChanged(circuit, gpio->value()); //set initial status
+                connect(gpio, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
+                m_monitorGpios.insert(gpio, circuit);
+            });
+        }
+    }
+
+    // In case of re-init
+    if (!m_pwms.isEmpty()) {
+        foreach (Pwm *pwm, m_pwms.keys()) {
+            m_pwms.remove(pwm);
+            pwm->deleteLater();
+        }
     }
 
     //Init Raspberry Pi PWM outputs
@@ -76,7 +104,7 @@ bool UniPi::init()
         Q_UNUSED(pin)
         //TODO Init Raspberry Pi Analog Input
     }
-    return false;
+    return true;
 }
 
 QString UniPi::type()
@@ -373,53 +401,9 @@ bool UniPi::getAnalogInput(const QString &circuit)
 void UniPi::onInputValueChanged(const bool &value)
 {
     GpioMonitor *monitor = static_cast<GpioMonitor *>(sender());
-    QString circuit;
-    switch (monitor->gpio()->gpioNumber()) {
-    case 4: //DI01 GPIO04 Digital input
-        circuit = "DI01";
-        break;
-    case 17: //DI02 GPIO17 Digital input
-        circuit = "DI02";
-        break;
-    case 27: //DI03 GPIO27 Digital input
-        circuit = "DI03";
-        break;
-    case 23: //DI04 GPIO23 Digital input
-        circuit = "DI04";
-        break;
-    case 22: //DI05 GPIO22 Digital input
-        circuit = "DI05";
-        break;
-    case 24: //DI06 GPIO24 Digital input
-        circuit = "DI06";
-        break;
-    case 11: //I07 GPIO11 Digital Input
-        circuit = "DI07";
-        break;
-    case 7: //I08 GPIO07 Digital Input
-        circuit = "DI08";
-        break;
-    case 8: //I09 GPIO08 Digital Input
-        circuit = "DI09";
-        break;
-    case 9: //I10 GPIO09 Digital Input
-        circuit = "DI10";
-        break;
-    case 25: //I11 GPIO25 Digital Input
-        circuit = "DI11";
-        break;
-    case 10: //DI12 GPIO10 Digital input
-        circuit = "DI12";
-        break;
-    case 31: //DI13 GPIO31 Digital input
-        circuit = "DI13";
-        break;
-    case 30: //DI14 GPIO30 Digital input
-        circuit = "DI14";
-        break;
-
-    default:
+    if (!m_monitorGpios.contains(monitor))
         return;
-    }
+
+    QString circuit = m_monitorGpios.value(monitor);
     emit digitalInputStatusChanged(circuit, value);
 }

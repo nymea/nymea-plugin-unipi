@@ -54,7 +54,7 @@
                     "name": "uniPi1",
                     "displayName": "UniPi 1",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -73,7 +73,7 @@
                     "name": "uniPi1Lite",
                     "displayName": "UniPi 1 Lite",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -92,7 +92,7 @@
                     "name": "neuronL403",
                     "displayName": "Neuron L403",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -111,7 +111,7 @@
                     "name": "neuronS103",
                     "displayName": "Neuron S103",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -130,7 +130,7 @@
                     "name": "neuronM103",
                     "displayName": "Neuron M103",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -149,7 +149,7 @@
                     "name": "neuronM203",
                     "displayName": "Neuron M203",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -168,7 +168,7 @@
                     "name": "neuronM303",
                     "displayName": "Neuron M303",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -187,7 +187,7 @@
                     "name": "neuronM403",
                     "displayName": "Neuron M403",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -206,7 +206,7 @@
                     "name": "neuronM503",
                     "displayName": "Neuron M503",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -225,7 +225,7 @@
                     "name": "neuronL203",
                     "displayName": "Neuron L203",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -244,7 +244,7 @@
                     "name": "neuronL303",
                     "displayName": "Neuron L303",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -263,7 +263,7 @@
                     "name": "neuronL503",
                     "displayName": "Neuron L503",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -282,7 +282,7 @@
                     "name": "neuronL513",
                     "displayName": "Neuron L513",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                     ],
                     "stateTypes": [
@@ -301,7 +301,7 @@
                     "name": "neuronXS10",
                     "displayName": "Neuron xS10",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                         {
                             "id": "c105e97a-1e00-44fd-ac10-d43e731e43b0",
@@ -327,7 +327,7 @@
                     "name": "neuronXS20",
                     "displayName": "Neuron xS20",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                         {
                             "id": "a5c97b47-580b-4ea3-8755-ef68380f5c2a",
@@ -353,7 +353,7 @@
                     "name": "neuronXS30",
                     "displayName": "Neuron xS30",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                         {
                             "id": "956254a2-83f5-4f3c-8e79-e1b009a7e203",
@@ -379,7 +379,7 @@
                     "name": "neuronXS40",
                     "displayName": "Neuron xS40",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                         {
                             "id": "6b2da1ee-5cae-4325-913e-21d26d5909c3",
@@ -405,7 +405,7 @@
                     "name": "neuronXS50",
                     "displayName": "Neuron xS50",
                     "createMethods": ["user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                         {
                             "id": "6d01f6b3-7c3c-4fc8-acf2-dc9811340a76",
@@ -438,12 +438,6 @@
                             "name": "circuit",
                             "displayName": "Circuit",
                             "type": "QString"
-                        },
-                        {
-                            "id": "d5ba1fe9-a93c-46e8-a162-4a9969f97806",
-                            "name": "parentId",
-                            "displayName": "Parent id",
-                            "type": "QString"
                         }
                     ],
                     "stateTypes": [
@@ -468,12 +462,6 @@
                             "id": "c01d5bde-de5d-42c5-b462-79745827875a",
                             "name": "circuit",
                             "displayName": "Circuit",
-                            "type": "QString"
-                        },
-                        {
-                            "id": "f356d835-7ad2-44c9-9cc7-2329235e6114",
-                            "name": "parentId",
-                            "displayName": "Parent id",
                             "type": "QString"
                         }
                     ],
@@ -501,12 +489,6 @@
                             "id": "46e606cc-67ee-4891-bc39-8fb0565c87da",
                             "name": "circuit",
                             "displayName": "Circuit",
-                            "type": "QString"
-                        },
-                        {
-                            "id": "384ba000-90fc-4f91-9a96-aa927359dd9b",
-                            "name": "parentId",
-                            "displayName": "Parent id",
                             "type": "QString"
                         }
                     ],
@@ -538,12 +520,6 @@
                             "name": "circuit",
                             "displayName": "Circuit",
                             "type": "QString"
-                        },
-                        {
-                            "id": "c403ffc4-db54-48d3-a10f-cfe2835e5cd3",
-                            "name": "parentId",
-                            "displayName": "Parent id",
-                            "type": "QString"
                         }
                     ],
                     "stateTypes": [
@@ -569,12 +545,6 @@
                             "id": "88fffbd6-6469-47ce-bfba-700da90a6075",
                             "name": "circuit",
                             "displayName": "Circuit",
-                            "type": "QString"
-                        },
-                        {
-                            "id": "72f566c2-31f7-4a36-83ed-1cd06a5eecc8",
-                            "name": "parentId",
-                            "displayName": "Parent id",
                             "type": "QString"
                         }
                     ],
