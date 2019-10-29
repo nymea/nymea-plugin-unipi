@@ -344,6 +344,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!m_unipi->init()) {
             qCWarning(dcUniPi()) << "Could not setup UniPi";
             m_unipi->deleteLater();
+            m_unipi = nullptr;
             return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up UniPi."));
         }
         connect(m_unipi, &UniPi::digitalInputStatusChanged, this, &DevicePluginUniPi::onUniPiDigitalInputStatusChanged);
@@ -399,6 +400,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuron->deleteLater();
+            neuron = nullptr;
             return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron device."));
         }
         m_neurons.insert(device->id(), neuron);
@@ -444,7 +446,8 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
-            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Erro loading modbus map."));
+            neuronExtension = nullptr;
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
         }
         connect(neuronExtension, &NeuronExtension::requestExecuted, this, &DevicePluginUniPi::onRequestExecuted);
         connect(neuronExtension, &NeuronExtension::requestError, this, &DevicePluginUniPi::onRequestError);
@@ -517,6 +520,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     info->finish(Device::DeviceErrorHardwareFailure);
                 } else {
                     m_asyncActions.insert(requestId, info);
+                    connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
             }
@@ -527,6 +531,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     info->finish(Device::DeviceErrorHardwareFailure);
                 } else {
                     m_asyncActions.insert(requestId, info);
+                    connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
             }
@@ -551,6 +556,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     info->finish(Device::DeviceErrorHardwareFailure);
                 } else {
                     m_asyncActions.insert(requestId, info);
+                    connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
             }
@@ -561,6 +567,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     info->finish(Device::DeviceErrorHardwareFailure);
                 } else {
                     m_asyncActions.insert(requestId, info);
+                    connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
             }
@@ -580,6 +587,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     info->finish(Device::DeviceErrorHardwareFailure);
                 } else {
                     m_asyncActions.insert(requestId, info);
+                    connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
             }
@@ -590,6 +598,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     info->finish(Device::DeviceErrorHardwareFailure);
                 } else {
                     m_asyncActions.insert(requestId, info);
+                    connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
             }
@@ -979,6 +988,8 @@ bool DevicePluginUniPi::neuronDeviceInit()
 
         if (!m_modbusTCPMaster->connectDevice()) {
             qCWarning(dcUniPi()) << "Connect failed:" << m_modbusTCPMaster->errorString();
+            m_modbusTCPMaster->deleteLater();
+            m_modbusTCPMaster = nullptr;
             return false;
         }
     }
@@ -1009,6 +1020,8 @@ bool DevicePluginUniPi::neuronExtensionInterfaceInit()
 
         if (!m_modbusRTUMaster->connectDevice()) {
             qCWarning(dcUniPi()) << "Connect failed:" << m_modbusRTUMaster->errorString();
+            m_modbusRTUMaster->deleteLater();
+            m_modbusRTUMaster = nullptr;
             return false;
         }
     }
