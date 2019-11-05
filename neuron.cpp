@@ -329,7 +329,7 @@ bool Neuron::getAllDigitalInputs()
         return true; //device has no digital inputs
     }
 
-    qSort(registerList);
+    std::sort(registerList.begin(), registerList.end());
     int previousReg = registerList.first(); //first register to read and starting point to get the following registers
     int startAddress;
 
@@ -379,7 +379,7 @@ bool Neuron::getAllDigitalOutputs()
         return true; //device has no digital outputs
     }
 
-    qSort(registerList);
+    std::sort(registerList.begin(), registerList.end());
     int previousReg = registerList.first(); //first register to read and starting point to get the following registers
     int startAddress;
 
