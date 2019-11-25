@@ -44,6 +44,11 @@ NeuronExtension::NeuronExtension(ExtensionTypes extensionType, QModbusRtuSerialM
     m_outputPollingTimer->setTimerType(Qt::TimerType::PreciseTimer);
     m_outputPollingTimer->setInterval(1000);
 
+    if (m_modbusInterface->state() == QModbusDevice::State::ConnectedState) {
+         m_inputPollingTimer->start();
+         m_outputPollingTimer->start();
+    }
+
     connect(m_modbusInterface, &QModbusDevice::stateChanged, this, [this] (QModbusDevice::State state) {
         if (state == QModbusDevice::State::ConnectedState) {
             if (m_inputPollingTimer)
