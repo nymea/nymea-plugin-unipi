@@ -513,8 +513,8 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
             if (m_unipi) {
                 m_unipi->setDigitalOutput(digitalOutputNumber, stateValue);
             }
-            if (m_neurons.contains(device->parentId().toString())) {
-                Neuron *neuron = m_neurons.value(device->parentId().toString());
+            if (m_neurons.contains(device->parentId())) {
+                Neuron *neuron = m_neurons.value(device->parentId());
                 QUuid requestId = neuron->setDigitalOutput(digitalOutputNumber, stateValue);
                 if (requestId.isNull()) {
                     info->finish(Device::DeviceErrorHardwareFailure);
@@ -524,8 +524,8 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                 }
                 return;
             }
-            if (m_neuronExtensions.contains(device->parentId().toString())) {
-                NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId().toString());
+            if (m_neuronExtensions.contains(device->parentId())) {
+                NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId());
                 QUuid requestId = neuronExtension->setDigitalOutput(digitalOutputNumber, stateValue);
                 if (requestId.isNull()) {
                     info->finish(Device::DeviceErrorHardwareFailure);
@@ -549,8 +549,8 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
             if (m_unipi) {
                 m_unipi->setAnalogOutput(analogOutputNumber, analogValue);
             }
-            if (m_neurons.contains(device->parentId().toString())) {
-                Neuron *neuron = m_neurons.value(device->parentId().toString());
+            if (m_neurons.contains(device->parentId())) {
+                Neuron *neuron = m_neurons.value(device->parentId());
                 QUuid requestId = neuron->setAnalogOutput(analogOutputNumber, analogValue);
                 if (requestId.isNull()) {
                     info->finish(Device::DeviceErrorHardwareFailure);
@@ -560,8 +560,8 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                 }
                 return;
             }
-            if (m_neuronExtensions.contains(device->parentId().toString())) {
-                NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId().toString());
+            if (m_neuronExtensions.contains(device->parentId())) {
+                NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId());
                 QUuid requestId = neuronExtension->setAnalogOutput(analogOutputNumber, analogValue);
                 if (requestId.isNull()) {
                     info->finish(Device::DeviceErrorHardwareFailure);
@@ -580,8 +580,8 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
         if (action.actionTypeId() == userLEDPowerActionTypeId) {
             QString userLED = device->paramValue(userLEDDeviceCircuitParamTypeId).toString();
             bool stateValue = action.param(userLEDPowerActionPowerParamTypeId).value().toBool();
-            if (m_neurons.contains(device->parentId().toString())) {
-                Neuron *neuron = m_neurons.value(device->parentId().toString());
+            if (m_neurons.contains(device->parentId())) {
+                Neuron *neuron = m_neurons.value(device->parentId());
                 QUuid requestId = neuron->setUserLED(userLED, stateValue);
                 if (requestId.isNull()) {
                     info->finish(Device::DeviceErrorHardwareFailure);
@@ -591,8 +591,8 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                 }
                 return;
             }
-            if (m_neuronExtensions.contains(device->parentId().toString())) {
-                NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId().toString());
+            if (m_neuronExtensions.contains(device->parentId())) {
+                NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId());
                 QUuid requestId = neuronExtension->setUserLED(userLED, stateValue);
                 if (requestId.isNull()) {
                     info->finish(Device::DeviceErrorHardwareFailure);
