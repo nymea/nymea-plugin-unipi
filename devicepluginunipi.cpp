@@ -427,22 +427,27 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         if (!neuronExtensionInterfaceInit())
             return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
 
-        int slaveAddress = device->paramValue(neuronXS10DeviceSlaveAddressParamTypeId).toInt();
-        NeuronExtension *neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS10, m_modbusRTUMaster, slaveAddress, this);
+        int slaveAddress;
+        NeuronExtension *neuronExtension;
 
         if(device->deviceClassId() == neuronXS10DeviceClassId) {
+            slaveAddress = device->paramValue(neuronXS10DeviceSlaveAddressParamTypeId).toInt();
             neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS10, m_modbusRTUMaster, slaveAddress, this);
         } else if (device->deviceClassId() == neuronXS20DeviceClassId) {
+            slaveAddress = device->paramValue(neuronXS20DeviceSlaveAddressParamTypeId).toInt();
             neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS20, m_modbusRTUMaster, slaveAddress, this);
         } else if (device->deviceClassId() == neuronXS30DeviceClassId) {
+            slaveAddress = device->paramValue(neuronXS30DeviceSlaveAddressParamTypeId).toInt();
             neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS30, m_modbusRTUMaster, slaveAddress, this);
         } else if (device->deviceClassId() == neuronXS40DeviceClassId) {
+            slaveAddress = device->paramValue(neuronXS40DeviceSlaveAddressParamTypeId).toInt();
             neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS40, m_modbusRTUMaster, slaveAddress, this);
         } else if (device->deviceClassId() == neuronXS50DeviceClassId) {
+            slaveAddress = device->paramValue(neuronXS50DeviceSlaveAddressParamTypeId).toInt();
             neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS50, m_modbusRTUMaster, slaveAddress, this);
         } else {
-            neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS10, m_modbusRTUMaster, slaveAddress, this);
-        }
+            qCWarning(dcUniPi()) << "Device class not found";
+         }
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
