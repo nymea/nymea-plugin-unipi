@@ -160,8 +160,8 @@ bool Neuron::loadModbusMap()
         fileCoilList.append(QString("/Neuron_S103/Neuron_S103-Coils-group-1.csv"));
         break;
     case NeuronTypes::M103:
-        fileCoilList.append(QString("/Neuron_M103/Neuron_L103-Coils-group-1.csv"));
-        fileCoilList.append(QString("/Neuron_M103/Neuron_L103-Coils-group-2.csv"));
+        fileCoilList.append(QString("/Neuron_M103/Neuron_M103-Coils-group-1.csv"));
+        fileCoilList.append(QString("/Neuron_M103/Neuron_M103-Coils-group-2.csv"));
         break;
     case NeuronTypes::M203:
         fileCoilList.append(QString("/Neuron_M203/Neuron_M203-Coils-group-1.csv"));
