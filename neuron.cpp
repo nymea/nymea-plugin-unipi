@@ -478,7 +478,7 @@ bool Neuron::getAllAnalogInputs()
         qCWarning(dcUniPi()) << "Neuron modbus interface not initialized";
         return false;
     }
-    return getInputRegisters(m_modbusAnalogOutputRegisters.values());
+    return getInputRegisters(m_modbusAnalogInputRegisters.values());
 }
 
 bool Neuron::getAllAnalogOutputs()
@@ -753,8 +753,7 @@ void Neuron::onInputPollingTimer()
 void Neuron::onFinished()
 {
     QModbusReply *reply = qobject_cast<QModbusReply *>(sender());
-    if (!reply)
-        return;
+    reply->deleteLater();
     int modbusAddress = 0;
 
     if (reply->error() == QModbusDevice::NoError) {
@@ -800,7 +799,7 @@ void Neuron::onFinished()
                     circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
                     emit analogOutputStatusChanged(circuit, unit.value(i));
                 } else {
-                    qCWarning(dcUniPi()) << "Received unrecorgnised modbus register" << modbusAddress;
+                    qCWarning(dcUniPi()) << "Received unrecognised modbus register" << modbusAddress;
                 }
                 break;
             case QModbusDataUnit::RegisterType::DiscreteInputs:
@@ -813,9 +812,8 @@ void Neuron::onFinished()
     } else if (reply->error() == QModbusDevice::ProtocolError) {
         qCWarning(dcUniPi()) << "Read response error:" << reply->errorString() << reply->rawResult().exceptionCode();
     } else {
-        qCWarning(dcUniPi()) << "Read response error:" << reply->error();
+        qCWarning(dcUniPi()) << "Read response error:" << reply->error() << reply->errorString();
     }
-    reply->deleteLater();
 }
 
 void Neuron::onErrorOccured(QModbusDevice::Error error)
@@ -824,5 +822,5 @@ void Neuron::onErrorOccured(QModbusDevice::Error error)
     QModbusReply *reply = qobject_cast<QModbusReply *>(sender());
     if (!reply)
         return;
-    reply->finished(); //to make sure it will be deleted
+    reply->deleteLater(); //to make sure it will be deleted
 }
