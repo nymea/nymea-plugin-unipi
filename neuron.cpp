@@ -393,6 +393,7 @@ bool Neuron::getHoldingRegisters(QList<int> registerList)
     }
 
     foreach (int startAddress, registerGroups.keys()) {
+        qDebug(dcUniPi()) << "Register" << startAddress << "length" << registerGroups.value(startAddress);
         QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, startAddress, registerGroups.value(startAddress));
         if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
             if (!reply->isFinished()) {
@@ -478,7 +479,10 @@ bool Neuron::getAllAnalogInputs()
         qCWarning(dcUniPi()) << "Neuron modbus interface not initialized";
         return false;
     }
-    return getInputRegisters(m_modbusAnalogInputRegisters.values());
+    foreach(QString circuit, m_modbusAnalogInputRegisters.keys()) {
+        getAnalogInput(circuit);
+    }
+    return true;
 }
 
 bool Neuron::getAllAnalogOutputs()
@@ -487,7 +491,10 @@ bool Neuron::getAllAnalogOutputs()
         qCWarning(dcUniPi()) << "Neuron modbus interface not initialized";
         return false;
     }
-    return getHoldingRegisters(m_modbusAnalogOutputRegisters.values());
+    foreach(QString circuit, m_modbusAnalogOutputRegisters.keys()) {
+        getAnalogOutput(circuit);
+    }
+    return true;
 }
 
 bool Neuron::getDigitalInput(const QString &circuit)
@@ -499,6 +506,31 @@ bool Neuron::getDigitalInput(const QString &circuit)
         return false;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
+
+    if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, this, &Neuron::onFinished);
+            connect(reply, &QModbusReply::errorOccurred, this, &Neuron::onErrorOccured);
+            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
+        } else {
+            delete reply; // broadcast replies return immediately
+        }
+    } else {
+        qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        return false;
+    }
+    return true;
+}
+
+bool Neuron::getAnalogOutput(const QString &circuit)
+{
+    int modbusAddress = m_modbusAnalogInputRegisters.value(circuit);
+    qDebug(dcUniPi()) << "Reading analog Input" << circuit << modbusAddress;
+
+    if (!m_modbusInterface)
+        return false;
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 2);
 
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
@@ -601,8 +633,9 @@ QUuid Neuron::setAnalogOutput(const QString &circuit, double value)
         return "";
 
     QUuid requestId = QUuid::createUuid();
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
-    request.setValue(0, static_cast<uint16_t>(value));
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 2);
+    request.setValue(0, (static_cast<uint32_t>(value) >> 16));    //FIXME
+    request.setValue(0, (static_cast<uint32_t>(value) & 0xffff)); //FIXME
 
     if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
@@ -614,7 +647,7 @@ QUuid Neuron::setAnalogOutput(const QString &circuit, double value)
                     int modbusAddress = unit.startAddress();
                     if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
                         QString circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
-                        emit analogOutputStatusChanged(circuit, unit.value(0));
+                        emit analogOutputStatusChanged(circuit, (unit.value(0) << 16 | unit.value(1))); //TODO merge 2 words into float
                     }
                 } else {
                     requestExecuted(requestId, false);
@@ -649,7 +682,7 @@ bool Neuron::getAnalogInput(const QString &circuit)
     if (!m_modbusInterface)
         return false;
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, modbusAddress, 1);
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, modbusAddress, 2);
 
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
@@ -663,8 +696,7 @@ bool Neuron::getAnalogInput(const QString &circuit)
         qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
         return false;
     }
-
-    return false;
+    return true;
 }
 
 QUuid Neuron::setUserLED(const QString &circuit, bool value)
@@ -791,13 +823,17 @@ void Neuron::onFinished()
                 break;
 
             case QModbusDataUnit::RegisterType::HoldingRegisters:
+                if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
+                    circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
+                    emit analogOutputStatusChanged(circuit, (unit.value(i) << 16 | unit.value(i+1)));
+                } else {
+                    qCWarning(dcUniPi()) << "Received unrecognised modbus register" << modbusAddress;
+                }
+                break;
             case QModbusDataUnit::RegisterType::InputRegisters:
                 if(m_modbusAnalogInputRegisters.values().contains(modbusAddress)){
                     circuit = m_modbusAnalogInputRegisters.key(modbusAddress);
-                    emit analogInputStatusChanged(circuit, unit.value(i));
-                } else if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
-                    circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
-                    emit analogOutputStatusChanged(circuit, unit.value(i));
+                    emit analogInputStatusChanged(circuit, (unit.value(i) << 16 | unit.value(i+1)));
                 } else {
                     qCWarning(dcUniPi()) << "Received unrecognised modbus register" << modbusAddress;
                 }

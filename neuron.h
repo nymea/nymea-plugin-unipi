@@ -67,7 +67,6 @@ public:
     bool getDigitalOutput(const QString &circuit);
     bool getDigitalInput(const QString &circuit);
 
-
     bool getAnalogOutput(const QString &circuit);
     bool getAnalogInput(const QString &circuit);
 
