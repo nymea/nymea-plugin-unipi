@@ -304,8 +304,8 @@ bool Neuron::loadModbusMap()
         while (!textStream->atEnd()) {
             QString line = textStream->readLine();
             QStringList list = line.split(',');
-            if (list[4] == "Basic") {
-                QString circuit = list[3].split(" ").at(3);
+            if (list.last() == "Basic") {
+                QString circuit = list[5].split(" ").last();
                 if (list[3].contains("Analog Input Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogInputRegisters.insert(circuit, list[0].toInt());
                     qDebug(dcUniPi()) << "Found analog input register" << circuit << list[0].toInt();
