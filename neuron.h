@@ -73,6 +73,8 @@ public:
 
     bool getAllDigitalOutputs();
     bool getAllDigitalInputs();
+    bool getAllAnalogInputs();
+    bool getAllAnalogOutputs();
 
     bool getUserLED(const QString &circuit);
 private:
@@ -94,6 +96,9 @@ private:
     QHash<int, uint16_t> m_previousModbusRegisterValue;
 
     bool loadModbusMap();
+
+    bool getHoldingRegisters(QList<int> registers);
+    bool getCoils(QList<int> registers);
 
 signals:
     void requestExecuted(QUuid requestId, bool success);
