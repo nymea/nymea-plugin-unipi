@@ -45,8 +45,8 @@ NeuronExtension::NeuronExtension(ExtensionTypes extensionType, QModbusRtuSerialM
     m_outputPollingTimer->setInterval(1000);
 
     if (m_modbusInterface->state() == QModbusDevice::State::ConnectedState) {
-         m_inputPollingTimer->start();
-         m_outputPollingTimer->start();
+        m_inputPollingTimer->start();
+        m_outputPollingTimer->start();
     }
 
     connect(m_modbusInterface, &QModbusDevice::stateChanged, this, [this] (QModbusDevice::State state) {
@@ -237,12 +237,12 @@ bool NeuronExtension::loadModbusMap()
         while (!textStream->atEnd()) {
             QString line = textStream->readLine();
             QStringList list = line.split(',');
-            if (list[4] == "Basic") {
-                QString circuit = list[3].split(" ").at(3);
-                if (list[3].contains("Analog Input Value", Qt::CaseSensitivity::CaseInsensitive)) {
+            if (list.last() == "Basic") {
+                QString circuit = list[5].split(" ").last();
+                if (list[5].contains("Analog Input Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogInputRegisters.insert(circuit, list[0].toInt());
                     qDebug(dcUniPi()) << "Found analog input register" << circuit << list[0].toInt();
-                } else if (list[3].contains("Analog Output Value", Qt::CaseSensitivity::CaseInsensitive)) {
+                } else if (list[5].contains("Analog Output Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogOutputRegisters.insert(circuit, list[0].toInt());
                     qDebug(dcUniPi()) << "Found analog output register" << circuit << list[0].toInt();
                 }
@@ -268,7 +268,6 @@ bool NeuronExtension::getDigitalInput(const QString &circuit)
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &NeuronExtension::onFinished);
-            connect(reply, &QModbusReply::errorOccurred, this, &NeuronExtension::onErrorOccured);
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -312,12 +311,6 @@ QUuid NeuronExtension::setDigitalOutput(const QString &circuit, bool value)
                 }
                 reply->deleteLater();
             });
-            connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-
-                qCWarning(dcUniPi()) << "Modbus replay error:" << error;
-                emit requestError(requestId, reply->errorString());
-                reply->finished(); // To make sure it will be deleted
-            });
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -343,7 +336,6 @@ bool NeuronExtension::getDigitalOutput(const QString &circuit)
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &NeuronExtension::onFinished);
-            connect(reply, &QModbusReply::errorOccurred, this, &NeuronExtension::onErrorOccured);
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -394,7 +386,6 @@ bool NeuronExtension::getAllDigitalInputs()
         if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
             if (!reply->isFinished()) {
                 connect(reply, &QModbusReply::finished, this, &NeuronExtension::onFinished);
-                connect(reply, &QModbusReply::errorOccurred, this, &NeuronExtension::onErrorOccured);
                 QTimer::singleShot(200, reply, &QModbusReply::deleteLater);;
             } else {
                 delete reply; // broadcast replies return immediately
@@ -403,6 +394,28 @@ bool NeuronExtension::getAllDigitalInputs()
             qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
             return false;
         }
+    }
+    return true;
+}
+
+bool NeuronExtension::getAllAnalogOutputs()
+{
+    if (!m_modbusInterface)
+        return false;
+
+    foreach (QString circuit, m_modbusAnalogOutputRegisters.keys()) {
+        getAnalogOutput(circuit);
+    }
+    return true;
+}
+
+bool NeuronExtension::getAllAnalogInputs()
+{
+    if (!m_modbusInterface)
+        return false;
+
+    foreach (QString circuit, m_modbusAnalogInputRegisters.keys()) {
+        getAnalogInput(circuit);
     }
     return true;
 }
@@ -445,7 +458,6 @@ bool NeuronExtension::getAllDigitalOutputs()
         if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
             if (!reply->isFinished()) {
                 connect(reply, &QModbusReply::finished, this, &NeuronExtension::onFinished);
-                connect(reply, &QModbusReply::errorOccurred, this, &NeuronExtension::onErrorOccured);
                 QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
             } else {
                 delete reply; // broadcast replies return immediately
@@ -467,7 +479,8 @@ QUuid NeuronExtension::setAnalogOutput(const QString &circuit, double value)
     QUuid requestId = QUuid::createUuid();
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 2);
-    request.setValue(0, static_cast<uint16_t>(value));
+    request.setValue(0, static_cast<uint32_t>(value) >> 16);
+    request.setValue(1, static_cast<uint32_t>(value) & 0xffff);
     //TODO cast double to 2 uint16_t
 
     if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
@@ -480,7 +493,7 @@ QUuid NeuronExtension::setAnalogOutput(const QString &circuit, double value)
                     int modbusAddress = unit.startAddress();
                     if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
                         QString circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
-                        emit analogOutputStatusChanged(circuit, unit.value(0));
+                        emit analogOutputStatusChanged(circuit, (unit.value(0) << 16 | unit.value(1)));
                     }
                 } else {
                     requestExecuted(requestId, false);
@@ -519,7 +532,6 @@ bool NeuronExtension::getAnalogOutput(const QString &circuit)
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &NeuronExtension::onFinished);
-            connect(reply, &QModbusReply::errorOccurred, this, &NeuronExtension::onErrorOccured);
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -544,7 +556,6 @@ bool NeuronExtension::getAnalogInput(const QString &circuit)
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &NeuronExtension::onFinished);
-            connect(reply, &QModbusReply::errorOccurred, this, &NeuronExtension::onErrorOccured);
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -573,6 +584,7 @@ QUuid NeuronExtension::setUserLED(const QString &circuit, bool value)
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
 
+                reply->deleteLater();
                 if (reply->error() == QModbusDevice::NoError) {
                     requestExecuted(requestId, true);
                     const QModbusDataUnit unit = reply->result();
@@ -585,13 +597,6 @@ QUuid NeuronExtension::setUserLED(const QString &circuit, bool value)
                     requestExecuted(requestId, false);
                     qCWarning(dcUniPi()) << "Read response error:" << reply->error();
                 }
-                reply->deleteLater();
-            });
-            connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-
-                qCWarning(dcUniPi()) << "Modbus replay error:" << error;
-                emit requestError(requestId, reply->errorString());
-                reply->finished(); // To make sure it will be deleted
             });
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
@@ -619,7 +624,6 @@ bool NeuronExtension::getUserLED(const QString &circuit)
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &NeuronExtension::onFinished);
-            connect(reply, &QModbusReply::errorOccurred, this, &NeuronExtension::onErrorOccured);
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -634,17 +638,13 @@ bool NeuronExtension::getUserLED(const QString &circuit)
 void NeuronExtension::onOutputPollingTimer()
 {
     getAllDigitalOutputs();
-    /*foreach (QString circuit, m_modbusDigitalOutputRegisters.keys()) {
-        getDigitalOutput(circuit);
-    }*/
+    getAllAnalogOutputs();
 }
 
 void NeuronExtension::onInputPollingTimer()
 {
     getAllDigitalInputs();
-    /*foreach (QString circuit, m_modbusDigitalInputRegisters.keys()) {
-        getDigitalInput(circuit);
-    }*/
+    getAllAnalogInputs();
 }
 
 
@@ -696,15 +696,14 @@ void NeuronExtension::onFinished()
                     circuit = m_modbusAnalogInputRegisters.key(modbusAddress);
                     emit analogInputStatusChanged(circuit, unit.value(i));
                 }
-
+                break;
+            case QModbusDataUnit::RegisterType::HoldingRegisters:
                 if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
                     circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
                     emit analogOutputStatusChanged(circuit, unit.value(i));
                 }
                 break;
-            case QModbusDataUnit::RegisterType::HoldingRegisters:
             case QModbusDataUnit::RegisterType::DiscreteInputs:
-                break;
             case QModbusDataUnit::RegisterType::Invalid:
                 qCWarning(dcUniPi()) << "Invalide register type";
                 break;
@@ -717,13 +716,4 @@ void NeuronExtension::onFinished()
         qCWarning(dcUniPi()) << "Read response error:" << reply->error();
     }
     reply->deleteLater();
-}
-
-void NeuronExtension::onErrorOccured(QModbusDevice::Error error)
-{
-    Q_UNUSED(error)
-    QModbusReply *reply = qobject_cast<QModbusReply *>(sender());
-    if (!reply)
-        return;
-    reply->finished(); //to make sure it will be deleted
 }

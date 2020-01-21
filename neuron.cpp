@@ -353,7 +353,6 @@ bool Neuron::getInputRegisters(QList<int> registerList)
         if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
             if (!reply->isFinished()) {
                 connect(reply, &QModbusReply::finished, this, &Neuron::onFinished);
-                connect(reply, &QModbusReply::errorOccurred, this, &Neuron::onErrorOccured);
                 QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
             } else {
                 delete reply; // broadcast replies return immediately
@@ -398,7 +397,6 @@ bool Neuron::getHoldingRegisters(QList<int> registerList)
         if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
             if (!reply->isFinished()) {
                 connect(reply, &QModbusReply::finished, this, &Neuron::onFinished);
-                connect(reply, &QModbusReply::errorOccurred, this, &Neuron::onErrorOccured);
                 QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
             } else {
                 delete reply; // broadcast replies return immediately
@@ -442,7 +440,6 @@ bool Neuron::getCoils(QList<int> registerList)
         if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
             if (!reply->isFinished()) {
                 connect(reply, &QModbusReply::finished, this, &Neuron::onFinished);
-                connect(reply, &QModbusReply::errorOccurred, this, &Neuron::onErrorOccured);
                 QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
             } else {
                 delete reply; // broadcast replies return immediately
@@ -510,7 +507,6 @@ bool Neuron::getDigitalInput(const QString &circuit)
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &Neuron::onFinished);
-            connect(reply, &QModbusReply::errorOccurred, this, &Neuron::onErrorOccured);
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -535,7 +531,6 @@ bool Neuron::getAnalogOutput(const QString &circuit)
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &Neuron::onFinished);
-            connect(reply, &QModbusReply::errorOccurred, this, &Neuron::onErrorOccured);
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -565,6 +560,7 @@ QUuid Neuron::setDigitalOutput(const QString &circuit, bool value)
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
 
+                reply->deleteLater();
                 if (reply->error() == QModbusDevice::NoError) {
                     requestExecuted(requestId, true);
                     const QModbusDataUnit unit = reply->result();
@@ -577,13 +573,6 @@ QUuid Neuron::setDigitalOutput(const QString &circuit, bool value)
                     requestExecuted(requestId, false);
                     qCWarning(dcUniPi()) << "Read response error:" << reply->error();
                 }
-                reply->deleteLater();
-            });
-            connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-
-                qCWarning(dcUniPi()) << "Modbus replay error:" << error;
-                emit requestError(requestId, reply->errorString());
-                reply->finished(); // To make sure it will be deleted
             });
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
@@ -611,7 +600,6 @@ bool Neuron::getDigitalOutput(const QString &circuit)
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &Neuron::onFinished);
-            connect(reply, &QModbusReply::errorOccurred, this, &Neuron::onErrorOccured);
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -641,6 +629,7 @@ QUuid Neuron::setAnalogOutput(const QString &circuit, double value)
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
 
+                reply->deleteLater();
                 if (reply->error() == QModbusDevice::NoError) {
                     requestExecuted(requestId, true);
                     const QModbusDataUnit unit = reply->result();
@@ -653,13 +642,6 @@ QUuid Neuron::setAnalogOutput(const QString &circuit, double value)
                     requestExecuted(requestId, false);
                     qCWarning(dcUniPi()) << "Read response error:" << reply->error();
                 }
-                reply->deleteLater();
-            });
-            connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-
-                qCWarning(dcUniPi()) << "Modbus replay error:" << error;
-                emit requestError(requestId, reply->errorString());
-                reply->finished(); // To make sure it will be deleted
             });
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
@@ -687,7 +669,6 @@ bool Neuron::getAnalogInput(const QString &circuit)
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &Neuron::onFinished);
-            connect(reply, &QModbusReply::errorOccurred, this, &Neuron::onErrorOccured);
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -715,6 +696,7 @@ QUuid Neuron::setUserLED(const QString &circuit, bool value)
     if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
         connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
 
+            reply->deleteLater();
             if (reply->error() == QModbusDevice::NoError) {
                 requestExecuted(requestId, true);
                 const QModbusDataUnit unit = reply->result();
@@ -727,13 +709,6 @@ QUuid Neuron::setUserLED(const QString &circuit, bool value)
                 requestExecuted(requestId, false);
                 qCWarning(dcUniPi()) << "Read response error:" << reply->error();
             }
-            reply->deleteLater();
-        });
-        connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-
-            qCWarning(dcUniPi()) << "Modbus replay error:" << error;
-            emit requestError(requestId, reply->errorString());
-            reply->finished(); // To make sure it will be deleted
         });
         QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
     } else {
@@ -757,7 +732,6 @@ bool Neuron::getUserLED(const QString &circuit)
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &Neuron::onFinished);
-            connect(reply, &QModbusReply::errorOccurred, this, &Neuron::onErrorOccured);
             QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
@@ -850,13 +824,4 @@ void Neuron::onFinished()
     } else {
         qCWarning(dcUniPi()) << "Read response error:" << reply->error() << reply->errorString();
     }
-}
-
-void Neuron::onErrorOccured(QModbusDevice::Error error)
-{
-    Q_UNUSED(error)
-    QModbusReply *reply = qobject_cast<QModbusReply *>(sender());
-    if (!reply)
-        return;
-    reply->deleteLater(); //to make sure it will be deleted
 }

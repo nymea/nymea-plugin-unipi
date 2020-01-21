@@ -44,6 +44,8 @@ public:
 
     bool getAllDigitalOutputs();
     bool getAllDigitalInputs();
+    bool getAllAnalogOutputs();
+    bool getAllAnalogInputs();
 
     QUuid setUserLED(const QString &circuit, bool value);
     bool getUserLED(const QString &circuit);
@@ -83,7 +85,6 @@ private slots:
     void onInputPollingTimer();
 
     void onFinished();
-    void onErrorOccured(QModbusDevice::Error error);
 };
 
 #endif // NEURONEXTENSION_H
