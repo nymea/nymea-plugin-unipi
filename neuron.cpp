@@ -306,10 +306,10 @@ bool Neuron::loadModbusMap()
             QStringList list = line.split(',');
             if (list.last() == "Basic") {
                 QString circuit = list[5].split(" ").last();
-                if (list[3].contains("Analog Input Value", Qt::CaseSensitivity::CaseInsensitive)) {
+                if (list[5].contains("Analog Input Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogInputRegisters.insert(circuit, list[0].toInt());
                     qDebug(dcUniPi()) << "Found analog input register" << circuit << list[0].toInt();
-                } else if (list[3].contains("Analog Output Value", Qt::CaseSensitivity::CaseInsensitive)) {
+                } else if (list[5].contains("Analog Output Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogOutputRegisters.insert(circuit, list[0].toInt());
                     qDebug(dcUniPi()) << "Found analog output register" << circuit << list[0].toInt();
                 }
@@ -317,6 +317,50 @@ bool Neuron::loadModbusMap()
         }
         csvFile->close();
         csvFile->deleteLater();
+    }
+    return true;
+}
+
+bool Neuron::getInputRegisters(QList<int> registerList)
+{
+    if (registerList.isEmpty()) {
+        return true;
+    }
+
+    std::sort(registerList.begin(), registerList.end());
+    int previousReg = registerList.first(); //first register to read and starting point to get the following registers
+    int startAddress;
+
+    QHash<int, int> registerGroups;
+
+    foreach (int reg, registerList) {
+        //qDebug(dcUniPi()) << "Register" << reg << "previous Register" << previousReg;
+        if (reg == previousReg) { //first register
+            startAddress = reg;
+            registerGroups.insert(startAddress, 1);
+        } else if (reg == (previousReg + 1)) { //next register in block
+            previousReg = reg;
+            registerGroups.insert(startAddress, (registerGroups.value(startAddress) + 1)); //update block length
+        } else {    // new block
+            startAddress = reg;
+            previousReg = reg;
+            registerGroups.insert(startAddress, 1);
+        }
+    }
+
+    foreach (int startAddress, registerGroups.keys()) {
+        QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, startAddress, registerGroups.value(startAddress));
+        if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
+            if (!reply->isFinished()) {
+                connect(reply, &QModbusReply::finished, this, &Neuron::onFinished);
+                connect(reply, &QModbusReply::errorOccurred, this, &Neuron::onErrorOccured);
+                QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
+            } else {
+                delete reply; // broadcast replies return immediately
+            }
+        } else {
+            qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        }
     }
     return true;
 }
@@ -434,7 +478,7 @@ bool Neuron::getAllAnalogInputs()
         qCWarning(dcUniPi()) << "Neuron modbus interface not initialized";
         return false;
     }
-    return getCoils(m_modbusAnalogOutputRegisters.values());
+    return getInputRegisters(m_modbusAnalogOutputRegisters.values());
 }
 
 bool Neuron::getAllAnalogOutputs()
@@ -443,7 +487,7 @@ bool Neuron::getAllAnalogOutputs()
         qCWarning(dcUniPi()) << "Neuron modbus interface not initialized";
         return false;
     }
-    return getCoils(m_modbusAnalogOutputRegisters.values());
+    return getHoldingRegisters(m_modbusAnalogOutputRegisters.values());
 }
 
 bool Neuron::getDigitalInput(const QString &circuit)

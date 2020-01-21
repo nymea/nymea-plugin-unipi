@@ -97,6 +97,7 @@ private:
 
     bool loadModbusMap();
 
+    bool getInputRegisters(QList<int> registers);
     bool getHoldingRegisters(QList<int> registers);
     bool getCoils(QList<int> registers);
 
