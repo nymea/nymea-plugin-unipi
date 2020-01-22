@@ -237,8 +237,8 @@ bool NeuronExtension::loadModbusMap()
         while (!textStream->atEnd()) {
             QString line = textStream->readLine();
             QStringList list = line.split(',');
-            if (list.last() == "Basic") {
-                QString circuit = list[5].split(" ").last();
+            if (list.last() == "Basic" && list[5].split(" ").length() > 3) {
+                QString circuit = list[5].split(" ").at(3);
                 if (list[5].contains("Analog Input Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogInputRegisters.insert(circuit, list[0].toInt());
                     qDebug(dcUniPi()) << "Found analog input register" << circuit << list[0].toInt();
@@ -478,10 +478,8 @@ QUuid NeuronExtension::setAnalogOutput(const QString &circuit, double value)
 
     QUuid requestId = QUuid::createUuid();
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 2);
-    request.setValue(0, static_cast<uint32_t>(value) >> 16);
-    request.setValue(1, static_cast<uint32_t>(value) & 0xffff);
-    //TODO cast double to 2 uint16_t
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
+    request.setValue(0, static_cast<uint16_t>(value));
 
     if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
@@ -493,7 +491,7 @@ QUuid NeuronExtension::setAnalogOutput(const QString &circuit, double value)
                     int modbusAddress = unit.startAddress();
                     if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
                         QString circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
-                        emit analogOutputStatusChanged(circuit, (unit.value(0) << 16 | unit.value(1)));
+                        emit analogOutputStatusChanged(circuit, unit.value(0));
                     }
                 } else {
                     requestExecuted(requestId, false);
@@ -551,7 +549,7 @@ bool NeuronExtension::getAnalogInput(const QString &circuit)
     if (!m_modbusInterface)
         return false;
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, modbusAddress, 1);
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, modbusAddress, 2);
 
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
@@ -694,7 +692,7 @@ void NeuronExtension::onFinished()
             case QModbusDataUnit::RegisterType::InputRegisters:
                 if(m_modbusAnalogInputRegisters.values().contains(modbusAddress)){
                     circuit = m_modbusAnalogInputRegisters.key(modbusAddress);
-                    emit analogInputStatusChanged(circuit, unit.value(i));
+                    emit analogInputStatusChanged(circuit, ((unit.value(i) << 16) | unit.value(i+1)));
                 }
                 break;
             case QModbusDataUnit::RegisterType::HoldingRegisters:
