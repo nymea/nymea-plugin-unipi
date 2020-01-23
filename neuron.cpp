@@ -220,6 +220,11 @@ bool Neuron::loadModbusMap()
         while (!textStream->atEnd()) {
             QString line = textStream->readLine();
             QStringList list = line.split(',');
+            if (list.length() <= 4) {
+                qCWarning(dcUniPi()) << "currupted CSV file:" << csvFile->fileName();
+                csvFile->deleteLater();
+                return false;
+            }
             if (list[4] == "Basic") {
                 QString circuit = list[3].split(" ").last();
                 if (list[3].contains("Digital Input", Qt::CaseSensitivity::CaseInsensitive)) {
@@ -304,6 +309,11 @@ bool Neuron::loadModbusMap()
         while (!textStream->atEnd()) {
             QString line = textStream->readLine();
             QStringList list = line.split(',');
+            if (list.length() <= 5) {
+                qCWarning(dcUniPi()) << "currupted CSV file:" << csvFile->fileName();
+                csvFile->deleteLater();
+                return false;
+            }
             if (list.last() == "Basic") {
                 QString circuit = list[5].split(" ").last();
                 if (list[5].contains("Analog Input Value", Qt::CaseSensitivity::CaseInsensitive)) {
