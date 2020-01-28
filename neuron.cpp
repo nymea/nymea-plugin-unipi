@@ -340,6 +340,12 @@ bool Neuron::modbusWriteRequest(QUuid requestId, QModbusDataUnit request)
     if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
+                reply->deleteLater();
+
+                if (!m_writeRequestQueue.isEmpty()) {
+                    QPair<QUuid, QModbusDataUnit> request = m_writeRequestQueue.first();
+                    modbusWriteRequest(request.first, request.second);
+                }
 
                 if (reply->error() == QModbusDevice::NoError) {
                     requestExecuted(requestId, true);
@@ -349,23 +355,16 @@ bool Neuron::modbusWriteRequest(QUuid requestId, QModbusDataUnit request)
                         QString circuit = m_modbusDigitalOutputRegisters.key(modbusAddress);
                         emit digitalOutputStatusChanged(circuit, unit.value(0));
                     }
-
-                    if (!m_writeRequestQueue.isEmpty()) {
-                        QPair<QUuid, QModbusDataUnit> request = m_writeRequestQueue.first();
-                        modbusWriteRequest(request.first, request.second);
-                    }
-
                 } else {
                     requestExecuted(requestId, false);
                     qCWarning(dcUniPi()) << "Read response error:" << reply->error();
                 }
-                reply->deleteLater();
             });
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-                qCWarning(dcUniPi()) << "Modbus replay error:" << error;
+                qCWarning(dcUniPi()) << "Modbus error:" << error;
                 emit requestError(requestId, reply->errorString());
             });
-            QTimer::singleShot(2000, reply, &QModbusReply::deleteLater);
+            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
             return false;
@@ -677,7 +676,7 @@ QUuid Neuron::setAnalogOutput(const QString &circuit, double value)
                     qCWarning(dcUniPi()) << "Read response error:" << reply->error();
                 }
             });
-            QTimer::singleShot(2000, reply, &QModbusReply::deleteLater);
+            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
             return "";
@@ -744,7 +743,7 @@ QUuid Neuron::setUserLED(const QString &circuit, bool value)
                 qCWarning(dcUniPi()) << "Read response error:" << reply->error();
             }
         });
-        QTimer::singleShot(2000, reply, &QModbusReply::deleteLater);
+        QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
     } else {
         qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
         return "";
