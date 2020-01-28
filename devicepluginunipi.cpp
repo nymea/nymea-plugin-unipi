@@ -973,8 +973,8 @@ bool DevicePluginUniPi::neuronDeviceInit()
         m_modbusTCPMaster = new QModbusTcpClient(this);
         m_modbusTCPMaster->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
         m_modbusTCPMaster->setConnectionParameter(QModbusDevice::NetworkAddressParameter, ipAddress.toString());
-        //m_modbusTCPMaster->setTimeout(100);
-        //m_modbusTCPMaster->setNumberOfRetries(1);
+        m_modbusTCPMaster->setTimeout(1000);
+        m_modbusTCPMaster->setNumberOfRetries(3);
 
         connect(m_modbusTCPMaster, &QModbusTcpClient::stateChanged, this, &DevicePluginUniPi::onModbusTCPStateChanged);
 
