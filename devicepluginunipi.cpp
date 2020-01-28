@@ -89,7 +89,7 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
             DeviceId parentDeviceId = m_neuronExtensions.key(neuronExtension);
             foreach (QString circuit, neuronExtension->digitalInputs()) {
-                DeviceDescriptor deviceDescriptor(digitalInputDeviceClassId, QString("Digital input %1").arg(circuit), QString("Neuron extension %1, slave address %2").arg(neuronExtension->type().arg(QString::number(neuronExtension->slaveAddress()))), parentDeviceId);
+                DeviceDescriptor deviceDescriptor(digitalInputDeviceClassId, QString("Digital input %1").arg(circuit), QString("Neuron extension %1, slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), parentDeviceId);
                 foreach(Device *device, myDevices().filterByParentDeviceId(m_neuronExtensions.key(neuronExtension))) {
                     if (device->paramValue(digitalInputDeviceCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit;
@@ -122,9 +122,7 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
             }
         }
         return info->finish(Device::DeviceErrorNoError);
-    }
-
-    if (deviceClassId == digitalOutputDeviceClassId) {
+    } else if (deviceClassId == digitalOutputDeviceClassId) {
         foreach(Device *parentDevice, myDevices()) {
             if ((parentDevice->deviceClassId() == uniPi1DeviceClassId) || (parentDevice->deviceClassId() == uniPi1LiteDeviceClassId)) {
                 foreach (QString circuit, m_unipi->digitalOutputs()) {
@@ -148,7 +146,7 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
             DeviceId parentDeviceId = m_neuronExtensions.key(neuronExtension);
             foreach (QString circuit, neuronExtension->digitalOutputs()) {
-                DeviceDescriptor deviceDescriptor(digitalOutputDeviceClassId, QString("Digital output %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type().arg(QString::number(neuronExtension->slaveAddress()))), parentDeviceId);
+                DeviceDescriptor deviceDescriptor(digitalOutputDeviceClassId, QString("Digital output %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), parentDeviceId);
                 foreach(Device *device, myDevices().filterByParentDeviceId(m_neuronExtensions.key(neuronExtension))) {
                     if (device->paramValue(digitalOutputDeviceCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentDeviceId;
@@ -181,9 +179,7 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
             }
         }
         return info->finish(Device::DeviceErrorNoError);
-    }
-
-    if (deviceClassId == analogInputDeviceClassId) {
+    } else if (deviceClassId == analogInputDeviceClassId) {
         foreach(Device *parentDevice, myDevices()) {
             if ((parentDevice->deviceClassId() == uniPi1DeviceClassId) || (parentDevice->deviceClassId() == uniPi1LiteDeviceClassId)) {
                 foreach (QString circuit, m_unipi->analogInputs()) {
@@ -207,7 +203,7 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
             DeviceId parentDeviceId = m_neuronExtensions.key(neuronExtension);
             foreach (QString circuit, neuronExtension->analogInputs()) {
-                DeviceDescriptor deviceDescriptor(analogInputDeviceClassId, QString("Analog input %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type().arg(QString::number(neuronExtension->slaveAddress()))), parentDeviceId);
+                DeviceDescriptor deviceDescriptor(analogInputDeviceClassId, QString("Analog input %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), parentDeviceId);
                 foreach(Device *device, myDevices().filterByParentDeviceId(m_neuronExtensions.key(neuronExtension))) {
                     if (device->paramValue(analogInputDeviceCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentDeviceId;
@@ -240,15 +236,13 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
             }
         }
         return info->finish(Device::DeviceErrorNoError);
-    }
-
-    if (deviceClassId == analogOutputDeviceClassId) {
+    } else if (deviceClassId == analogOutputDeviceClassId) {
         //TODO add unipi 1 and unipi 1 lite
 
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
             DeviceId parentDeviceId = m_neuronExtensions.key(neuronExtension);
             foreach (QString circuit, neuronExtension->analogOutputs()) {
-                DeviceDescriptor deviceDescriptor(analogOutputDeviceClassId, QString("Analog output %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type().arg(QString::number(neuronExtension->slaveAddress()))), parentDeviceId);
+                DeviceDescriptor deviceDescriptor(analogOutputDeviceClassId, QString("Analog output %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), parentDeviceId);
                 foreach(Device *device, myDevices().filterByParentDeviceId(m_neuronExtensions.key(neuronExtension))) {
                     if (device->paramValue(analogOutputDeviceCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentDeviceId;
@@ -281,14 +275,12 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
             }
         }
         return info->finish(Device::DeviceErrorNoError);
-    }
-
-    if (deviceClassId == userLEDDeviceClassId) {
+    } else if (deviceClassId == userLEDDeviceClassId) {
         QList<DeviceDescriptor> deviceDescriptors;
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
             DeviceId parentDeviceId = m_neuronExtensions.key(neuronExtension);
             foreach (QString circuit, neuronExtension->userLEDs()) {
-                DeviceDescriptor deviceDescriptor(userLEDDeviceClassId, QString("User programmable LED %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type().arg(neuronExtension->slaveAddress())), parentDeviceId);
+                DeviceDescriptor deviceDescriptor(userLEDDeviceClassId, QString("User programmable LED %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(neuronExtension->slaveAddress()), parentDeviceId);
                 foreach(Device *device, myDevices().filterByParentDeviceId(m_neuronExtensions.key(neuronExtension))) {
                     if (device->paramValue(userLEDDeviceCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentDeviceId;
@@ -321,8 +313,10 @@ void DevicePluginUniPi::discoverDevices(DeviceDiscoveryInfo *info)
             }
         }
         return info->finish(Device::DeviceErrorNoError);
+    } else {
+        qCWarning(dcUniPi()) << "Unhandled device class in discoverDevice" << deviceClassId;
+        return info->finish(Device::DeviceErrorDeviceClassNotFound);
     }
-    qCWarning(dcUniPi()) << "Unhandled device class in discoverDevice";
 }
 
 void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
@@ -354,9 +348,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         device->setStateValue(m_connectionStateTypeIds.value(device->deviceClassId()), true);
 
         return info->finish(Device::DeviceErrorNoError);
-    }
-
-    if(device->deviceClassId() == neuronS103DeviceClassId ||
+    } else if(device->deviceClassId() == neuronS103DeviceClassId ||
             device->deviceClassId() == neuronM103DeviceClassId ||
             device->deviceClassId() == neuronM203DeviceClassId ||
             device->deviceClassId() == neuronM303DeviceClassId ||
@@ -394,7 +386,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         } else  if (device->deviceClassId() == neuronL513DeviceClassId) {
             neuron = new Neuron(Neuron::NeuronTypes::L513, m_modbusTCPMaster, this);
         } else {
-            neuron = new Neuron(Neuron::NeuronTypes::S103, m_modbusTCPMaster, this);
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error unrecognized Neuron type."));
         }
 
         if (!neuron->init()) {
@@ -416,9 +408,7 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         device->setStateValue(m_connectionStateTypeIds.value(device->deviceClassId()), (m_modbusTCPMaster->state() == QModbusDevice::ConnectedState));
 
         return info->finish(Device::DeviceErrorNoError);
-    }
-
-    if(device->deviceClassId() == neuronXS10DeviceClassId ||
+    } else if(device->deviceClassId() == neuronXS10DeviceClassId ||
             device->deviceClassId() == neuronXS20DeviceClassId ||
             device->deviceClassId() == neuronXS30DeviceClassId ||
             device->deviceClassId() == neuronXS40DeviceClassId ||
@@ -446,8 +436,8 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
             slaveAddress = device->paramValue(neuronXS50DeviceSlaveAddressParamTypeId).toInt();
             neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS50, m_modbusRTUMaster, slaveAddress, this);
         } else {
-            qCWarning(dcUniPi()) << "Device class not found";
-         }
+            return info->finish(Device::DeviceErrorSetupFailed, QT_TR_NOOP("Error unrecognized extension type."));
+        }
         if (!neuronExtension->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
             neuronExtension->deleteLater();
@@ -467,29 +457,20 @@ void DevicePluginUniPi::setupDevice(DeviceSetupInfo *info)
         device->setStateValue(m_connectionStateTypeIds.value(device->deviceClassId()), (m_modbusRTUMaster->state() == QModbusDevice::ConnectedState));
 
         return info->finish(Device::DeviceErrorNoError);
-    }
-
-    if (device->deviceClassId() == digitalOutputDeviceClassId) {
+    } else if (device->deviceClassId() == digitalOutputDeviceClassId) {
         return info->finish(Device::DeviceErrorNoError);
-    }
-
-    if (device->deviceClassId() == digitalInputDeviceClassId) {
+    } else if (device->deviceClassId() == digitalInputDeviceClassId) {
         return info->finish(Device::DeviceErrorNoError);
-    }
-
-    if (device->deviceClassId() == userLEDDeviceClassId) {
+    } else if (device->deviceClassId() == userLEDDeviceClassId) {
         return info->finish(Device::DeviceErrorNoError);
-    }
-
-    if (device->deviceClassId() == analogInputDeviceClassId) {
+    } else if (device->deviceClassId() == analogInputDeviceClassId) {
         return info->finish(Device::DeviceErrorNoError);
-    }
-
-    if (device->deviceClassId() == analogOutputDeviceClassId) {
+    } else if (device->deviceClassId() == analogOutputDeviceClassId) {
         return info->finish(Device::DeviceErrorNoError);
+    } else {
+        qCWarning(dcUniPi()) << "Unhandled device class in setupDevice:" << device->deviceClassId();
+        return info->finish(Device::DeviceErrorDeviceClassNotFound);
     }
-
-    qCWarning(dcUniPi()) << "Unhandled device class in setupDevice";
 }
 
 void DevicePluginUniPi::postSetupDevice(Device *device)
@@ -517,8 +498,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
 
             if (m_unipi) {
                 m_unipi->setDigitalOutput(digitalOutputNumber, stateValue);
-            }
-            if (m_neurons.contains(device->parentId())) {
+            } else if (m_neurons.contains(device->parentId())) {
                 Neuron *neuron = m_neurons.value(device->parentId());
                 QUuid requestId = neuron->setDigitalOutput(digitalOutputNumber, stateValue);
                 if (requestId.isNull()) {
@@ -528,8 +508,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
-            }
-            if (m_neuronExtensions.contains(device->parentId())) {
+            } else if (m_neuronExtensions.contains(device->parentId())) {
                 NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId());
                 QUuid requestId = neuronExtension->setDigitalOutput(digitalOutputNumber, stateValue);
                 if (requestId.isNull()) {
@@ -539,13 +518,15 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
+            } else {
+                qCWarning(dcUniPi()) << "Hardware not initilized" << device->name();
+                return info->finish(Device::DeviceErrorHardwareFailure);
             }
-            return info->finish(Device::DeviceErrorNoError);
+        } else {
+            qCWarning(dcUniPi()) << "Unhandled ActionTypeId" << action.actionTypeId();
+            return info->finish(Device::DeviceErrorActionTypeNotFound);
         }
-        return info->finish(Device::DeviceErrorActionTypeNotFound);
-    }
-
-    if (device->deviceClassId() == analogOutputDeviceClassId) {
+    } else if (device->deviceClassId() == analogOutputDeviceClassId) {
 
         if (action.actionTypeId() == analogOutputOutputValueActionTypeId) {
             QString analogOutputNumber = device->paramValue(analogOutputDeviceCircuitParamTypeId).toString();
@@ -553,8 +534,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
 
             if (m_unipi) {
                 m_unipi->setAnalogOutput(analogOutputNumber, analogValue);
-            }
-            if (m_neurons.contains(device->parentId())) {
+            } else if (m_neurons.contains(device->parentId())) {
                 Neuron *neuron = m_neurons.value(device->parentId());
                 QUuid requestId = neuron->setAnalogOutput(analogOutputNumber, analogValue);
                 if (requestId.isNull()) {
@@ -564,8 +544,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
-            }
-            if (m_neuronExtensions.contains(device->parentId())) {
+            } else if (m_neuronExtensions.contains(device->parentId())) {
                 NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId());
                 QUuid requestId = neuronExtension->setAnalogOutput(analogOutputNumber, analogValue);
                 if (requestId.isNull()) {
@@ -575,13 +554,15 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
+            } else {
+                qCWarning(dcUniPi()) << "Hardware not initilized" << device->name();
+                return info->finish(Device::DeviceErrorHardwareFailure);
             }
-            return info->finish(Device::DeviceErrorNoError);
+        } else {
+            qCWarning(dcUniPi()) << "Unhandled ActionTypeId" << action.actionTypeId();
+            return info->finish(Device::DeviceErrorActionTypeNotFound);
         }
-        return info->finish(Device::DeviceErrorActionTypeNotFound);
-    }
-
-    if (device->deviceClassId() == userLEDDeviceClassId) {
+    } else if (device->deviceClassId() == userLEDDeviceClassId) {
         if (action.actionTypeId() == userLEDPowerActionTypeId) {
             QString userLED = device->paramValue(userLEDDeviceCircuitParamTypeId).toString();
             bool stateValue = action.param(userLEDPowerActionPowerParamTypeId).value().toBool();
@@ -595,8 +576,7 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
-            }
-            if (m_neuronExtensions.contains(device->parentId())) {
+            } else if (m_neuronExtensions.contains(device->parentId())) {
                 NeuronExtension *neuronExtension = m_neuronExtensions.value(device->parentId());
                 QUuid requestId = neuronExtension->setUserLED(userLED, stateValue);
                 if (requestId.isNull()) {
@@ -606,12 +586,18 @@ void DevicePluginUniPi::executeAction(DeviceActionInfo *info)
                     connect(info, &DeviceActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
+            } else {
+                qCWarning(dcUniPi()) << "Hardware not initilized" << device->name();
+                return info->finish(Device::DeviceErrorHardwareFailure);
             }
-            return info->finish(Device::DeviceErrorNoError);
+        } else {
+            qCWarning(dcUniPi()) << "Unhandled ActionTypeId" << action.actionTypeId();
+            return info->finish(Device::DeviceErrorActionTypeNotFound);
         }
-        return info->finish(Device::DeviceErrorActionTypeNotFound);
+    } else {
+        qCWarning(dcUniPi()) << "Unhandled device class in executeAction" << device->deviceClassId();
+        info->finish(Device::DeviceErrorDeviceClassNotFound);
     }
-    qCWarning(dcUniPi()) << "Unhandled device class in executeAction";
 }
 
 
@@ -620,13 +606,10 @@ void DevicePluginUniPi::deviceRemoved(Device *device)
     if(m_neurons.contains(device->id())) {
         Neuron *neuron = m_neurons.take(device->id());
         neuron->deleteLater();
-    }
-    if(m_neuronExtensions.contains(device->id())) {
+    } else if(m_neuronExtensions.contains(device->id())) {
         NeuronExtension *neuronExtension = m_neuronExtensions.take(device->id());
         neuronExtension->deleteLater();
-    }
-
-    if ((device->deviceClassId() == uniPi1DeviceClassId) || (device->deviceClassId() == uniPi1LiteDeviceClassId)) {
+    } else if ((device->deviceClassId() == uniPi1DeviceClassId) || (device->deviceClassId() == uniPi1LiteDeviceClassId)) {
         if(m_unipi) {
             m_unipi->deleteLater();
             m_unipi = nullptr;
@@ -695,8 +678,10 @@ void DevicePluginUniPi::onNeuronConnectionStateChanged(bool state)
 {
     Neuron *neuron = static_cast<Neuron *>(sender());
     Device *device = myDevices().findById(m_neurons.key(neuron));
-    if (!device)
+    if (!device) {
+        qCWarning(dcUniPi()) << "Could not find any device associated to Neuron obejct";
         return;
+    }
     device->setStateValue(m_connectionStateTypeIds.value(device->deviceClassId()), state);
 }
 
@@ -838,8 +823,10 @@ void DevicePluginUniPi::onNeuronExtensionConnectionStateChanged(bool state)
 {
     NeuronExtension *neuron = static_cast<NeuronExtension *>(sender());
     Device *device = myDevices().findById(m_neuronExtensions.key(neuron));
-    if (!device)
+    if (!device) {
+        qCWarning(dcUniPi()) << "Could not find any device associated to NeuronExtension obejct";
         return;
+    }
     device->setStateValue(m_connectionStateTypeIds.value(device->deviceClassId()), state);
 }
 

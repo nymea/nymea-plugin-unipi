@@ -67,12 +67,13 @@ public:
     bool getDigitalOutput(const QString &circuit);
     bool getDigitalInput(const QString &circuit);
 
-
     bool getAnalogOutput(const QString &circuit);
     bool getAnalogInput(const QString &circuit);
 
     bool getAllDigitalOutputs();
     bool getAllDigitalInputs();
+    bool getAllAnalogInputs();
+    bool getAllAnalogOutputs();
 
     bool getUserLED(const QString &circuit);
 private:
@@ -95,6 +96,10 @@ private:
 
     bool loadModbusMap();
 
+    bool getInputRegisters(QList<int> registers);
+    bool getHoldingRegisters(QList<int> registers);
+    bool getCoils(QList<int> registers);
+
 signals:
     void requestExecuted(QUuid requestId, bool success);
     void requestError(QUuid requestId, const QString &error);
@@ -110,7 +115,6 @@ public slots:
     void onInputPollingTimer();
 
     void onFinished();
-    void onErrorOccured(QModbusDevice::Error error);
 };
 
 #endif // NEURON_H

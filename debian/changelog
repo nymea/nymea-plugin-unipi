@@ -1,3 +1,13 @@
+nymea-plugin-unipi2 (0.1.2) xenial; urgency=medium
+
+  [ Bernhard Trinnes ]
+  * fixed slave address
+
+  [ Michael Zanetti ]
+  * Fix building in sbuild
+
+ -- Jenkins <jenkins@nymea.io>  Thu, 16 Jan 2020 13:01:00 +0100
+
 nymea-plugin-unipi2 (0.1.1) xenial; urgency=medium
 
   [ Bernhard Trinnes ]
