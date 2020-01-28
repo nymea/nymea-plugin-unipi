@@ -89,12 +89,14 @@ private:
     QHash<QString, int> m_modbusAnalogInputRegisters;
     QHash<QString, int> m_modbusAnalogOutputRegisters;
     QHash<QString, int> m_modbusUserLEDRegisters;
+    QList<QPair<QUuid, QModbusDataUnit>> m_writeRequestQueue;
 
     NeuronTypes m_neuronType = NeuronTypes::S103;
 
     QHash<int, uint16_t> m_previousModbusRegisterValue;
 
     bool loadModbusMap();
+    bool modbusWriteRequest(QUuid requestId, QModbusDataUnit request);
 
     bool getInputRegisters(QList<int> registers);
     bool getHoldingRegisters(QList<int> registers);
