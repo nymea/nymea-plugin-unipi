@@ -270,6 +270,61 @@ bool NeuronExtension::loadModbusMap()
 }
 
 
+bool NeuronExtension::modbusWriteRequest(QUuid requestId, QModbusDataUnit request)
+{
+    if (!m_modbusInterface)
+        return false;
+
+    //Stop polling until all write requests are done
+    m_inputPollingTimer->stop();
+    m_outputPollingTimer->stop();
+
+    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
+                reply->deleteLater();
+
+                if (!m_writeRequestQueue.isEmpty()) {
+                    QPair<QUuid, QModbusDataUnit> request = m_writeRequestQueue.takeFirst();
+                    modbusWriteRequest(request.first, request.second);
+                } else {
+                    m_inputPollingTimer->start();
+                    m_outputPollingTimer->start();
+                }
+
+                if (reply->error() == QModbusDevice::NoError) {
+                    requestExecuted(requestId, true);
+                    const QModbusDataUnit unit = reply->result();
+                    int modbusAddress = unit.startAddress();
+                    if(m_modbusDigitalOutputRegisters.values().contains(modbusAddress)){
+                        QString circuit = m_modbusDigitalOutputRegisters.key(modbusAddress);
+                        emit digitalOutputStatusChanged(circuit, unit.value(0));
+                    } else if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
+                        QString circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
+                        emit analogOutputStatusChanged(circuit, unit.value(0));
+                    } else if(m_modbusUserLEDRegisters.values().contains(modbusAddress)){
+                        QString circuit = m_modbusUserLEDRegisters.key(modbusAddress);
+                        emit userLEDStatusChanged(circuit, unit.value(0));
+                    }
+                } else {
+                    requestExecuted(requestId, false);
+                    qCWarning(dcUniPi()) << "Read response error:" << reply->error();
+                    emit requestError(requestId, reply->errorString());
+                }
+            });
+            QTimer::singleShot(1000, reply, &QModbusReply::deleteLater);
+        } else {
+            delete reply; // broadcast replies return immediately
+            return false;
+        }
+    } else {
+        qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        return false;
+    }
+    return true;
+}
+
+
 bool NeuronExtension::getDigitalInput(const QString &circuit)
 {
     int modbusAddress = m_modbusDigitalInputRegisters.value(circuit);
@@ -283,7 +338,7 @@ bool NeuronExtension::getDigitalInput(const QString &circuit)
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, &NeuronExtension::onFinished);
-            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
+            QTimer::singleShot(1000, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
         }
@@ -308,33 +363,14 @@ QUuid NeuronExtension::setDigitalOutput(const QString &circuit, bool value)
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
     request.setValue(0, static_cast<uint16_t>(value));
 
-    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
-        if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
-
-                if (reply->error() == QModbusDevice::NoError) {
-                    requestExecuted(requestId, true);
-                    const QModbusDataUnit unit = reply->result();
-                    int modbusAddress = unit.startAddress();
-                    if(m_modbusDigitalOutputRegisters.values().contains(modbusAddress)){
-                        QString circuit = m_modbusDigitalOutputRegisters.key(modbusAddress);
-                        emit digitalOutputStatusChanged(circuit, unit.value(0));
-                    }
-                } else {
-                    requestExecuted(requestId, false);
-                    qCWarning(dcUniPi()) << "Read response error:" << reply->error();
-                }
-                reply->deleteLater();
-            });
-            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
-        } else {
-            delete reply; // broadcast replies return immediately
-            return "";
-        }
-    } else {
-        qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+    if (m_writeRequestQueue.isEmpty()) {
+        modbusWriteRequest(requestId, request);
+    } else if (m_writeRequestQueue.length() > 100) {
         return "";
+    } else {
+        m_writeRequestQueue.append(QPair<QUuid, QModbusDataUnit>(requestId, request));
     }
+
     return requestId;
 }
 
@@ -496,39 +532,14 @@ QUuid NeuronExtension::setAnalogOutput(const QString &circuit, double value)
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
     request.setValue(0, static_cast<uint16_t>(value));
 
-    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
-        if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
-
-                if (reply->error() == QModbusDevice::NoError) {
-                    requestExecuted(requestId, true);
-                    const QModbusDataUnit unit = reply->result();
-                    int modbusAddress = unit.startAddress();
-                    if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
-                        QString circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
-                        emit analogOutputStatusChanged(circuit, unit.value(0));
-                    }
-                } else {
-                    requestExecuted(requestId, false);
-                    qCWarning(dcUniPi()) << "Read response error:" << reply->error();
-                }
-                reply->deleteLater();
-            });
-            connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-
-                qCWarning(dcUniPi()) << "Modbus replay error:" << error;
-                emit requestError(requestId, reply->errorString());
-                reply->finished(); // To make sure it will be deleted
-            });
-            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
-        } else {
-            delete reply; // broadcast replies return immediately
-            return "";
-        }
-    } else {
-        qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+    if (m_writeRequestQueue.isEmpty()) {
+        modbusWriteRequest(requestId, request);
+    } else if (m_writeRequestQueue.length() > 100) {
         return "";
+    } else {
+        m_writeRequestQueue.append(QPair<QUuid, QModbusDataUnit>(requestId, request));
     }
+
     return requestId;
 }
 
@@ -593,33 +604,14 @@ QUuid NeuronExtension::setUserLED(const QString &circuit, bool value)
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
     request.setValue(0, static_cast<uint16_t>(value));
 
-    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
-        if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
-
-                reply->deleteLater();
-                if (reply->error() == QModbusDevice::NoError) {
-                    requestExecuted(requestId, true);
-                    const QModbusDataUnit unit = reply->result();
-                    int modbusAddress = unit.startAddress();
-                    if(m_modbusUserLEDRegisters.values().contains(modbusAddress)){
-                        QString circuit = m_modbusUserLEDRegisters.key(modbusAddress);
-                        emit userLEDStatusChanged(circuit, unit.value(0));
-                    }
-                } else {
-                    requestExecuted(requestId, false);
-                    qCWarning(dcUniPi()) << "Read response error:" << reply->error();
-                }
-            });
-            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
-        } else {
-            delete reply; // broadcast replies return immediately
-            return "";
-        }
-    } else {
-        qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+    if (m_writeRequestQueue.isEmpty()) {
+        modbusWriteRequest(requestId, request);
+    } else if (m_writeRequestQueue.length() > 100) {
         return "";
+    } else {
+        m_writeRequestQueue.append(QPair<QUuid, QModbusDataUnit>(requestId, request));
     }
+
     return requestId;
 }
 

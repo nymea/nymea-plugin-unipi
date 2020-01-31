@@ -59,6 +59,7 @@ private:
     QHash<QString, int> m_modbusAnalogInputRegisters;
     QHash<QString, int> m_modbusAnalogOutputRegisters;
     QHash<QString, int> m_modbusUserLEDRegisters;
+    QList<QPair<QUuid, QModbusDataUnit>> m_writeRequestQueue;
 
     QModbusRtuSerialMaster *m_modbusInterface = nullptr;
     int m_slaveAddress = 0;
@@ -66,6 +67,7 @@ private:
     QHash<int, uint16_t> m_previousModbusRegisterValue;
 
     bool loadModbusMap();
+    bool modbusWriteRequest(QUuid requestId, QModbusDataUnit request);
 
 signals:
     void requestExecuted(QUuid requestId, bool success);
