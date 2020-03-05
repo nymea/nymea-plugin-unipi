@@ -48,7 +48,7 @@
             "displayName": "UniPi",
             "name": "unipi",
             "id": "c82bfe27-d14d-40bd-b12f-ddba214b5fc5",
-            "deviceClasses": [
+            "thingClasses": [
                 {
                     "id": "f9f5d5eb-a768-40da-af62-55b0b486a5e5",
                     "name": "uniPi1",

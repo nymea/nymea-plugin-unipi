@@ -15,8 +15,6 @@ isEmpty(PLUGIN_PRI) {
   include($$PLUGIN_PRI)
 }
 
-TARGET = $$qtLibraryTarget(nymea_devicepluginunipi)
-
 LIBS += \
     -li2c \
 
@@ -26,7 +24,7 @@ QT += \
     serialbus \
 
 SOURCES += \
-    devicepluginunipi.cpp \
+    integrationpluginunipi.cpp \
     neuron.cpp \
     neuronextension.cpp \
     mcp23008.cpp \
@@ -35,7 +33,7 @@ SOURCES += \
     mcp3422.cpp
 
 HEADERS += \
-    devicepluginunipi.h \
+    integrationpluginunipi.h \
     neuron.h \
     neuronextension.h \
     mcp23008.h \
