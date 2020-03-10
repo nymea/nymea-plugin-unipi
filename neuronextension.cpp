@@ -282,6 +282,11 @@ bool NeuronExtension::modbusReadRequest(QModbusDataUnit request)
                 reply->deleteLater();
                 int modbusAddress = 0;
 
+                if (!m_readRequestQueue.isEmpty()) {
+                    QModbusDataUnit request = m_readRequestQueue.takeFirst();
+                    modbusReadRequest(request);
+                }
+
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
 
@@ -361,10 +366,6 @@ bool NeuronExtension::modbusWriteRequest(QUuid requestId, QModbusDataUnit reques
     if (!m_modbusInterface)
         return false;
 
-    //Stop polling until all write requests are done
-    m_inputPollingTimer->stop();
-    m_outputPollingTimer->stop();
-
     if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
@@ -373,9 +374,6 @@ bool NeuronExtension::modbusWriteRequest(QUuid requestId, QModbusDataUnit reques
                 if (!m_writeRequestQueue.isEmpty()) {
                     QPair<QUuid, QModbusDataUnit> request = m_writeRequestQueue.takeFirst();
                     modbusWriteRequest(request.first, request.second);
-                } else {
-                    m_inputPollingTimer->start();
-                    m_outputPollingTimer->start();
                 }
 
                 if (reply->error() == QModbusDevice::NoError) {
@@ -420,7 +418,14 @@ bool NeuronExtension::getDigitalInput(const QString &circuit)
         return false;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
-    return modbusReadRequest(request);
+    if (m_readRequestQueue.isEmpty()) {
+        return modbusReadRequest(request);
+    } else if (m_readRequestQueue.length() > 100) {
+        return "";
+    } else {
+        m_readRequestQueue.append(request);
+    }
+    return true;
 }
 
 
@@ -457,7 +462,15 @@ bool NeuronExtension::getDigitalOutput(const QString &circuit)
         return false;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
-    return modbusReadRequest(request);
+    if (m_readRequestQueue.isEmpty()) {
+        return modbusReadRequest(request);
+    } else if (m_readRequestQueue.length() > 100) {
+        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        return false;
+    } else {
+        m_readRequestQueue.append(request);
+    }
+    return true;
 }
 
 
@@ -496,7 +509,13 @@ bool NeuronExtension::getAllDigitalInputs()
 
     foreach (int startAddress, registerGroups.keys()) {
         QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, startAddress, registerGroups.value(startAddress));
-        modbusReadRequest(request);
+        if (m_readRequestQueue.isEmpty()) {
+            modbusReadRequest(request);
+        } else if (m_readRequestQueue.length() > 100) {
+            qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        } else {
+            m_readRequestQueue.append(request);
+        }
     }
     return true;
 }
@@ -558,7 +577,13 @@ bool NeuronExtension::getAllDigitalOutputs()
 
     foreach (int startAddress, registerGroups.keys()) {
         QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, startAddress, registerGroups.value(startAddress));
-        modbusReadRequest(request);
+        if (m_readRequestQueue.isEmpty()) {
+            modbusReadRequest(request);
+        } else if (m_readRequestQueue.length() > 100) {
+            qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        } else {
+            m_readRequestQueue.append(request);
+        }
     }
     return true;
 }
@@ -594,7 +619,15 @@ bool NeuronExtension::getAnalogOutput(const QString &circuit)
         return false;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
-    return modbusReadRequest(request);
+    if (m_readRequestQueue.isEmpty()) {
+        return modbusReadRequest(request);
+    } else if (m_readRequestQueue.length() > 100) {
+        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        return false;
+    } else {
+        m_readRequestQueue.append(request);
+    }
+    return true;
 }
 
 
@@ -606,7 +639,15 @@ bool NeuronExtension::getAnalogInput(const QString &circuit)
         return false;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, modbusAddress, 2);
-    return modbusReadRequest(request);
+    if (m_readRequestQueue.isEmpty()) {
+        return modbusReadRequest(request);
+    } else if (m_readRequestQueue.length() > 100) {
+        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        return false;
+    } else {
+        m_readRequestQueue.append(request);
+    }
+    return true;
 }
 
 QUuid NeuronExtension::setUserLED(const QString &circuit, bool value)
@@ -643,7 +684,15 @@ bool NeuronExtension::getUserLED(const QString &circuit)
         return false;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
-    return modbusReadRequest(request);
+    if (m_readRequestQueue.isEmpty()) {
+        return modbusReadRequest(request);
+    } else if (m_readRequestQueue.length() > 100) {
+        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        return false;
+    } else {
+        m_readRequestQueue.append(request);
+    }
+    return true;
 }
 
 
