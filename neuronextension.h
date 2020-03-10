@@ -50,6 +50,7 @@ public:
     QUuid setUserLED(const QString &circuit, bool value);
     bool getUserLED(const QString &circuit);
 private:
+    uint m_responseTimeoutTime = 2000;
 
     QTimer *m_inputPollingTimer = nullptr;
     QTimer *m_outputPollingTimer = nullptr;
@@ -60,6 +61,7 @@ private:
     QHash<QString, int> m_modbusAnalogOutputRegisters;
     QHash<QString, int> m_modbusUserLEDRegisters;
     QList<QPair<QUuid, QModbusDataUnit>> m_writeRequestQueue;
+    QList<QModbusDataUnit> m_readRequestQueue;
 
     QModbusRtuSerialMaster *m_modbusInterface = nullptr;
     int m_slaveAddress = 0;
@@ -67,7 +69,8 @@ private:
     QHash<int, uint16_t> m_previousModbusRegisterValue;
 
     bool loadModbusMap();
-    bool modbusWriteRequest(QUuid requestId, QModbusDataUnit request);
+    bool modbusWriteRequest(QUuid requestId, QModbusDataUnit request);    
+    bool modbusReadRequest(QModbusDataUnit request);
 
 signals:
     void requestExecuted(QUuid requestId, bool success);
@@ -85,8 +88,6 @@ signals:
 private slots:
     void onOutputPollingTimer();
     void onInputPollingTimer();
-
-    void onFinished();
 };
 
 #endif // NEURONEXTENSION_H
