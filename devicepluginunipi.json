@@ -64,7 +64,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -83,7 +84,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -102,7 +104,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -121,7 +124,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -140,7 +144,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -159,7 +164,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -178,7 +184,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -197,7 +204,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -216,7 +224,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
