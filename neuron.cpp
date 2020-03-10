@@ -385,10 +385,6 @@ bool Neuron::modbusReadRequest(QModbusDataUnit request)
     if (!m_modbusInterface)
         return false;
 
-    //Stop polling until all write requests are done
-    m_inputPollingTimer->stop();
-    m_outputPollingTimer->stop();
-
     if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, [reply, this] {
