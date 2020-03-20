@@ -110,8 +110,13 @@ QString NeuronExtension::type()
         return "xS40";
     case ExtensionTypes::xS50:
         return "xS50";
+    case ExtensionTypes::xS11:
+        return "xS11";
+    case ExtensionTypes::xS51:
+        return "xS51";
+    default:
+        return "Unknown";
     }
-    return "Unknown";
 }
 
 int NeuronExtension::slaveAddress()
@@ -170,6 +175,12 @@ bool NeuronExtension::loadModbusMap()
     case ExtensionTypes::xS50:
         fileCoilList.append(QString("/Neuron_xS50/Neuron_xS50-Coils-group-1.csv"));
         break;
+    case ExtensionTypes::xS11:
+        fileCoilList.append(QString("/Extension_xS11/Extension_xS11-Coils-group-1.csv"));
+        break;
+    case ExtensionTypes::xS51:
+        fileCoilList.append(QString("/Extension_xS51/Extension_xS51-Coils-group-1.csv"));
+        break;
     }
 
     foreach (QString relativeFilePath, fileCoilList) {
@@ -226,6 +237,12 @@ bool NeuronExtension::loadModbusMap()
         break;
     case ExtensionTypes::xS50:
         fileRegisterList.append(QString("/Neuron_xS50/Neuron_xS50-Registers-group-1.csv"));
+        break;
+    case ExtensionTypes::xS11:
+        fileRegisterList.append(QString("/Extension_xS11/Extension_xS11-Registers-group-1.csv"));
+        break;
+    case ExtensionTypes::xS51:
+        fileRegisterList.append(QString("/Extension_xS51/Extension_xS51-Registers-group-1.csv"));
         break;
     }
 

@@ -17,7 +17,9 @@ public:
         xS20,
         xS30,
         xS40,
-        xS50
+        xS50,
+        xS11,
+        xS51
     };
 
     explicit NeuronExtension(ExtensionTypes extensionType, QModbusRtuSerialMaster *modbusInterface, int slaveAddress, QObject *parent = nullptr);

@@ -56,6 +56,8 @@ void IntegrationPluginUniPi::init()
     m_connectionStateTypeIds.insert(neuronXS30ThingClassId, neuronXS30ConnectedStateTypeId);
     m_connectionStateTypeIds.insert(neuronXS40ThingClassId, neuronXS40ConnectedStateTypeId);
     m_connectionStateTypeIds.insert(neuronXS50ThingClassId, neuronXS50ConnectedStateTypeId);
+    m_connectionStateTypeIds.insert(neuronXS11ThingClassId, neuronXS11ConnectedStateTypeId);
+    m_connectionStateTypeIds.insert(neuronXS51ThingClassId, neuronXS51ConnectedStateTypeId);
 }
 
 void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
@@ -346,15 +348,15 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
 
         return info->finish(Thing::ThingErrorNoError);
     } else if(thing->thingClassId() == neuronS103ThingClassId ||
-            thing->thingClassId() == neuronM103ThingClassId ||
-            thing->thingClassId() == neuronM203ThingClassId ||
-            thing->thingClassId() == neuronM303ThingClassId ||
-            thing->thingClassId() == neuronM403ThingClassId ||
-            thing->thingClassId() == neuronL203ThingClassId ||
-            thing->thingClassId() == neuronL303ThingClassId ||
-            thing->thingClassId() == neuronL403ThingClassId ||
-            thing->thingClassId() == neuronL503ThingClassId ||
-            thing->thingClassId() == neuronL513ThingClassId) {
+              thing->thingClassId() == neuronM103ThingClassId ||
+              thing->thingClassId() == neuronM203ThingClassId ||
+              thing->thingClassId() == neuronM303ThingClassId ||
+              thing->thingClassId() == neuronM403ThingClassId ||
+              thing->thingClassId() == neuronL203ThingClassId ||
+              thing->thingClassId() == neuronL303ThingClassId ||
+              thing->thingClassId() == neuronL403ThingClassId ||
+              thing->thingClassId() == neuronL503ThingClassId ||
+              thing->thingClassId() == neuronL513ThingClassId) {
 
         if (!neuronDeviceInit())
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
@@ -406,10 +408,12 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
 
         return info->finish(Thing::ThingErrorNoError);
     } else if(thing->thingClassId() == neuronXS10ThingClassId ||
-            thing->thingClassId() == neuronXS20ThingClassId ||
-            thing->thingClassId() == neuronXS30ThingClassId ||
-            thing->thingClassId() == neuronXS40ThingClassId ||
-            thing->thingClassId() == neuronXS50ThingClassId) {
+              thing->thingClassId() == neuronXS20ThingClassId ||
+              thing->thingClassId() == neuronXS30ThingClassId ||
+              thing->thingClassId() == neuronXS40ThingClassId ||
+              thing->thingClassId() == neuronXS50ThingClassId ||
+              thing->thingClassId() == neuronXS11ThingClassId ||
+              thing->thingClassId() == neuronXS51ThingClassId) {
 
         if (!neuronExtensionInterfaceInit())
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
@@ -432,6 +436,12 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         } else if (thing->thingClassId() == neuronXS50ThingClassId) {
             slaveAddress = thing->paramValue(neuronXS50ThingSlaveAddressParamTypeId).toInt();
             neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS50, m_modbusRTUMaster, slaveAddress, this);
+        } else if (thing->thingClassId() == neuronXS11ThingClassId) {
+            slaveAddress = thing->paramValue(neuronXS11ThingSlaveAddressParamTypeId).toInt();
+            neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS11, m_modbusRTUMaster, slaveAddress, this);
+        } else if (thing->thingClassId() == neuronXS51ThingClassId) {
+            slaveAddress = thing->paramValue(neuronXS51ThingSlaveAddressParamTypeId).toInt();
+            neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS51, m_modbusRTUMaster, slaveAddress, this);
         } else {
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error unrecognized extension type."));
         }
