@@ -385,7 +385,7 @@ bool Neuron::modbusReadRequest(QModbusDataUnit request)
     if (!m_modbusInterface)
         return false;
 
-    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
+    if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, [reply, this] {
                 reply->deleteLater();
