@@ -787,12 +787,12 @@ bool Neuron::getUserLED(const QString &circuit)
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
     if (m_readRequestQueue.isEmpty()) {
-        return modbusReadRequest(request);
+        //return modbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 100) {
         qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
         return false;
     } else {
-        m_readRequestQueue.append(request);
+        //m_readRequestQueue.append(request);
     }
     return true;
 }
