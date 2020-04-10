@@ -801,11 +801,11 @@ bool Neuron::getUserLED(const QString &circuit)
 void Neuron::onOutputPollingTimer()
 {
     getAllDigitalOutputs();
-    getAllAnalogOutputs();
+    //getAllAnalogOutputs();
 }
 
 void Neuron::onInputPollingTimer()
 {
     getAllDigitalInputs();
-    getAllAnalogInputs();
+    //getAllAnalogInputs();
 }

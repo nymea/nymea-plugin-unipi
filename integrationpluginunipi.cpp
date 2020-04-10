@@ -65,11 +65,11 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
     ThingClassId ThingClassId = info->thingClassId();
 
     if (ThingClassId == digitalInputThingClassId) {
-        foreach(Thing *Parent, myThings()) {
-            if ((Parent->thingClassId() == uniPi1ThingClassId) || (Parent->thingClassId() == uniPi1LiteThingClassId)) {
+        foreach(Thing *parent, myThings()) {
+            if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
                 foreach (QString circuit, m_unipi->digitalInputs()) {
                     ThingDescriptor thingDescriptor(digitalInputThingClassId, QString("Digital input %1").arg(circuit), "UniPi 1", Parent->id());
-                    foreach(Thing *thing, myThings().filterByParentId(Parent->id())) {
+                    foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
                         if (thing->paramValue(digitalInputThingCircuitParamTypeId) == circuit) {
                             qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit;
                             thingDescriptor.setThingId(thing->id());
@@ -86,10 +86,10 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
 
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
-            ThingId ParentId = m_neuronExtensions.key(neuronExtension);
+            ThingId parentId = m_neuronExtensions.key(neuronExtension);
             foreach (QString circuit, neuronExtension->digitalInputs()) {
-                ThingDescriptor ThingDescriptor(digitalInputThingClassId, QString("Digital input %1").arg(circuit), QString("Neuron extension %1, slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), ParentId);
-                foreach(Thing *thing, myThings().filterByParentId(m_neuronExtensions.key(neuronExtension))) {
+                ThingDescriptor ThingDescriptor(digitalInputThingClassId, QString("Digital input %1").arg(circuit), QString("Neuron extension %1, slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), parentId);
+                foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(digitalInputThingCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit;
                         ThingDescriptor.setThingId(thing->id());
@@ -104,12 +104,12 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
 
         foreach (Neuron *neuron, m_neurons) {
-            ThingId ParentId = m_neurons.key(neuron);
+            ThingId parentId = m_neurons.key(neuron);
             foreach (QString circuit, neuron->digitalInputs()) {
-                ThingDescriptor ThingDescriptor(digitalInputThingClassId, QString("Digital input %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), ParentId);
+                ThingDescriptor ThingDescriptor(digitalInputThingClassId, QString("Digital input %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), parentId);
                 foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
                     if (thing->paramValue(digitalInputThingCircuitParamTypeId) == circuit) {
-                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << ParentId;
+                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
                         ThingDescriptor.setThingId(thing->id());
                         break;
                     }
@@ -122,13 +122,13 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == digitalOutputThingClassId) {
-        foreach(Thing *Parent, myThings()) {
-            if ((Parent->thingClassId() == uniPi1ThingClassId) || (Parent->thingClassId() == uniPi1LiteThingClassId)) {
+        foreach(Thing *parent, myThings()) {
+            if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
                 foreach (QString circuit, m_unipi->digitalOutputs()) {
-                    ThingDescriptor ThingDescriptor(digitalOutputThingClassId, QString("Digital output %1").arg(circuit), "UniPi 1", Parent->id());
-                    foreach(Thing *thing, myThings().filterByParentId(Parent->id())) {
+                    ThingDescriptor ThingDescriptor(digitalOutputThingClassId, QString("Digital output %1").arg(circuit), "UniPi 1", parent->id());
+                    foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
                         if (thing->paramValue(digitalOutputThingCircuitParamTypeId) == circuit) {
-                            qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << Parent->id();
+                            qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parent->id();
                             ThingDescriptor.setThingId(thing->id());
                             break;
                         }
@@ -143,12 +143,12 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
 
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
-            ThingId ParentId = m_neuronExtensions.key(neuronExtension);
+            ThingId parentId = m_neuronExtensions.key(neuronExtension);
             foreach (QString circuit, neuronExtension->digitalOutputs()) {
-                ThingDescriptor ThingDescriptor(digitalOutputThingClassId, QString("Digital output %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), ParentId);
-                foreach(Thing *thing, myThings().filterByParentId(m_neuronExtensions.key(neuronExtension))) {
+                ThingDescriptor ThingDescriptor(digitalOutputThingClassId, QString("Digital output %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), parentId);
+                foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(digitalOutputThingCircuitParamTypeId) == circuit) {
-                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << ParentId;
+                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
                         ThingDescriptor.setThingId(thing->id());
                         break;
                     }
@@ -161,12 +161,12 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
 
         foreach (Neuron *neuron, m_neurons) {
-            ThingId ParentId = m_neurons.key(neuron);
+            ThingId parentId = m_neurons.key(neuron);
             foreach (QString circuit, neuron->digitalOutputs()) {
-                ThingDescriptor ThingDescriptor(digitalOutputThingClassId, QString("Digital output %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), ParentId);
-                foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
+                ThingDescriptor ThingDescriptor(digitalOutputThingClassId, QString("Digital output %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), parentId);
+                foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(digitalOutputThingCircuitParamTypeId) == circuit) {
-                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << ParentId;
+                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
                         ThingDescriptor.setThingId(thing->id());
                         break;
                     }
@@ -179,13 +179,13 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == analogInputThingClassId) {
-        foreach(Thing *Parent, myThings()) {
-            if ((Parent->thingClassId() == uniPi1ThingClassId) || (Parent->thingClassId() == uniPi1LiteThingClassId)) {
+        foreach(Thing *parent, myThings()) {
+            if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
                 foreach (QString circuit, m_unipi->analogInputs()) {
-                    ThingDescriptor ThingDescriptor(analogInputThingClassId, QString("Analog input %1").arg(circuit), "UniPi", Parent->id());
-                    foreach(Thing *thing, myThings().filterByParentId(Parent->id())) {
+                    ThingDescriptor ThingDescriptor(analogInputThingClassId, QString("Analog input %1").arg(circuit), "UniPi", parent->id());
+                    foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
                         if (thing->paramValue(analogInputThingCircuitParamTypeId) == circuit) {
-                            qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << Parent->id();
+                            qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parent->id();
                             ThingDescriptor.setThingId(thing->id());
                             break;
                         }
@@ -200,12 +200,12 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
 
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
-            ThingId ParentId = m_neuronExtensions.key(neuronExtension);
+            ThingId parentId = m_neuronExtensions.key(neuronExtension);
             foreach (QString circuit, neuronExtension->analogInputs()) {
-                ThingDescriptor ThingDescriptor(analogInputThingClassId, QString("Analog input %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), ParentId);
-                foreach(Thing *thing, myThings().filterByParentId(m_neuronExtensions.key(neuronExtension))) {
+                ThingDescriptor ThingDescriptor(analogInputThingClassId, QString("Analog input %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), parentId);
+                foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(analogInputThingCircuitParamTypeId) == circuit) {
-                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << ParentId;
+                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
                         ThingDescriptor.setThingId(thing->id());
                         break;
                     }
@@ -218,12 +218,12 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
 
         foreach (Neuron *neuron, m_neurons) {
-            ThingId ParentId = m_neurons.key(neuron);
+            ThingId parentId = m_neurons.key(neuron);
             foreach (QString circuit, neuron->analogInputs()) {
-                ThingDescriptor ThingDescriptor(analogInputThingClassId, QString("Analog input %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), ParentId);
-                foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
+                ThingDescriptor ThingDescriptor(analogInputThingClassId, QString("Analog input %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), parentId);
+                foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(analogInputThingCircuitParamTypeId) == circuit) {
-                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << ParentId;
+                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
                         ThingDescriptor.setThingId(thing->id());
                         break;
                     }
@@ -239,12 +239,12 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         //TODO add unipi 1 and unipi 1 lite
 
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
-            ThingId ParentId = m_neuronExtensions.key(neuronExtension);
+            ThingId parentId = m_neuronExtensions.key(neuronExtension);
             foreach (QString circuit, neuronExtension->analogOutputs()) {
-                ThingDescriptor ThingDescriptor(analogOutputThingClassId, QString("Analog output %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), ParentId);
-                foreach(Thing *thing, myThings().filterByParentId(m_neuronExtensions.key(neuronExtension))) {
+                ThingDescriptor ThingDescriptor(analogOutputThingClassId, QString("Analog output %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(QString::number(neuronExtension->slaveAddress())), parentId);
+                foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(analogOutputThingCircuitParamTypeId) == circuit) {
-                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << ParentId;
+                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
                         ThingDescriptor.setThingId(thing->id());
                         break;
                     }
@@ -257,12 +257,12 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
 
         foreach (Neuron *neuron, m_neurons) {
-            ThingId ParentId = m_neurons.key(neuron);
+            ThingId parentId = m_neurons.key(neuron);
             foreach (QString circuit, neuron->analogOutputs()) {
-                ThingDescriptor ThingDescriptor(analogOutputThingClassId, QString("Analog output %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), ParentId);
-                foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
+                ThingDescriptor ThingDescriptor(analogOutputThingClassId, QString("Analog output %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), parentId);
+                foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(analogOutputThingCircuitParamTypeId) == circuit) {
-                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << ParentId;
+                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
                         ThingDescriptor.setThingId(thing->id());
                         break;
                     }
@@ -277,12 +277,12 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
     } else if (ThingClassId == userLEDThingClassId) {
         QList<ThingDescriptor> ThingDescriptors;
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
-            ThingId ParentId = m_neuronExtensions.key(neuronExtension);
+            ThingId parentId = m_neuronExtensions.key(neuronExtension);
             foreach (QString circuit, neuronExtension->userLEDs()) {
-                ThingDescriptor ThingDescriptor(userLEDThingClassId, QString("User programmable LED %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(neuronExtension->slaveAddress()), ParentId);
-                foreach(Thing *thing, myThings().filterByParentId(m_neuronExtensions.key(neuronExtension))) {
+                ThingDescriptor ThingDescriptor(userLEDThingClassId, QString("User programmable LED %1").arg(circuit), QString("Neuron extension %1, Slave address %2").arg(neuronExtension->type()).arg(neuronExtension->slaveAddress()), parentId);
+                foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(userLEDThingCircuitParamTypeId) == circuit) {
-                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << ParentId;
+                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
                         ThingDescriptor.setThingId(thing->id());
                         break;
                     }
@@ -295,12 +295,12 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
 
         foreach (Neuron *neuron, m_neurons) {
-            ThingId ParentId = m_neurons.key(neuron);
+            ThingId parentId = m_neurons.key(neuron);
             foreach (QString circuit, neuron->userLEDs()) {
-                ThingDescriptor ThingDescriptor(userLEDThingClassId, QString("User programmable LED %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), ParentId);
+                ThingDescriptor ThingDescriptor(userLEDThingClassId, QString("User programmable LED %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), parentId);
                 foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
                     if (thing->paramValue(userLEDThingCircuitParamTypeId) == circuit) {
-                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << ParentId;
+                        qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
                         ThingDescriptor.setThingId(thing->id());
                         break;
                     }
@@ -955,9 +955,9 @@ void IntegrationPluginUniPi::onUniPiAnalogInputStatusChanged(const QString &circ
 
 void IntegrationPluginUniPi::onUniPiAnalogOutputStatusChanged(const QString &circuit, double value)
 {
-    foreach(Thing *Parent, myThings()) {
-        if ((Parent->thingClassId() == uniPi1ThingClassId) || (Parent->thingClassId() == uniPi1LiteThingClassId)) {
-            foreach(Thing *thing, myThings().filterByParentId(Parent->id())) {
+    foreach(Thing *parent, myThings()) {
+        if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
+            foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
                 if (thing->thingClassId() == analogOutputThingClassId) {
                     if (thing->paramValue(analogOutputThingCircuitParamTypeId).toString() == circuit) {
 
