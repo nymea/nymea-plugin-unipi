@@ -876,12 +876,14 @@ void IntegrationPluginUniPi::onReconnectTimer()
 {
     if(m_modbusRTUMaster) {
         if (!m_modbusRTUMaster->connectDevice()) {
+            qCWarning(dcUniPi()) << "Reconnecing to modbus RTU master failed, trying again in 10 seconds";
             if (m_reconnectTimer)
                 m_reconnectTimer->start(10000);
         }
     }
     if(m_modbusTCPMaster) {
         if (!m_modbusTCPMaster->connectDevice()) {
+            qCWarning(dcUniPi()) << "Reconnecing to modbus TCP master failed, trying again in 10 seconds";
             if (m_reconnectTimer)
                 m_reconnectTimer->start(10000);
         }
