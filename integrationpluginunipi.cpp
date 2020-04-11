@@ -68,7 +68,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         foreach(Thing *parent, myThings()) {
             if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
                 foreach (QString circuit, m_unipi->digitalInputs()) {
-                    ThingDescriptor thingDescriptor(digitalInputThingClassId, QString("Digital input %1").arg(circuit), "UniPi 1", Parent->id());
+                    ThingDescriptor thingDescriptor(digitalInputThingClassId, QString("Digital input %1").arg(circuit), "UniPi 1", parent->id());
                     foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
                         if (thing->paramValue(digitalInputThingCircuitParamTypeId) == circuit) {
                             qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit;
