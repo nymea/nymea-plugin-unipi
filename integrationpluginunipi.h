@@ -21,10 +21,10 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef DEVICEPLUGINUNIPI_H
-#define DEVICEPLUGINUNIPI_H
+#ifndef INTEGRATIONPLUGINUNIPI_H
+#define INTEGRATIONPLUGINUNIPI_H
 
-#include "devices/devicemanager.h"
+#include "integrations/integrationplugin.h"
 #include "plugintimer.h"
 #include "unipi.h"
 #include "neuron.h"
@@ -35,35 +35,35 @@
 #include <QHostAddress>
 #include <QUuid>
 
-class DevicePluginUniPi : public DevicePlugin
+class IntegrationPluginUniPi : public IntegrationPlugin
 {
     Q_OBJECT
 
-    Q_PLUGIN_METADATA(IID "io.nymea.DevicePlugin" FILE "devicepluginunipi.json")
-    Q_INTERFACES(DevicePlugin)
+    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginunipi.json")
+    Q_INTERFACES(IntegrationPlugin)
 
 public:
 
-    explicit DevicePluginUniPi();
+    explicit IntegrationPluginUniPi();
     void init() override;
 
-    void discoverDevices(DeviceDiscoveryInfo *info) override;
-    void setupDevice(DeviceSetupInfo *info) override;
-    void postSetupDevice(Device *device) override;
-    void executeAction(DeviceActionInfo *info) override;
-    void deviceRemoved(Device *device) override;
+    void discoverThings(ThingDiscoveryInfo *info) override;
+    void setupThing(ThingSetupInfo *info) override;
+    void postSetupThing(Thing *thing) override;
+    void executeAction(ThingActionInfo *info) override;
+    void thingRemoved(Thing *thing) override;
 
 private:
     UniPi *m_unipi = nullptr;
-    QHash<DeviceId, Neuron *> m_neurons;
-    QHash<DeviceId, NeuronExtension *> m_neuronExtensions;
+    QHash<ThingId, Neuron *> m_neurons;
+    QHash<ThingId, NeuronExtension *> m_neuronExtensions;
     QModbusTcpClient *m_modbusTCPMaster = nullptr;
     QModbusRtuSerialMaster *m_modbusRTUMaster = nullptr;
 
-    QHash<Device *, QTimer *> m_unlatchTimer;
+    QHash<Thing *, QTimer *> m_unlatchTimer;
     QTimer *m_reconnectTimer = nullptr;
-    QHash<QUuid, DeviceActionInfo *> m_asyncActions;
-    QHash<DeviceClassId, StateTypeId> m_connectionStateTypeIds;
+    QHash<QUuid, ThingActionInfo *> m_asyncActions;
+    QHash<ThingClassId, StateTypeId> m_connectionStateTypeIds;
 
     bool neuronDeviceInit();
     bool neuronExtensionInterfaceInit();
@@ -99,4 +99,4 @@ private slots:
     void onUniPiAnalogOutputStatusChanged(const QString &circuit,double value);
 };
 
-#endif // DEVICEPLUGINUNIPI_H
+#endif // INTEGRATIONPLUGINUNIPI_H

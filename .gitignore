@@ -1,3 +1,5 @@
 .crossbuilder
 .pro.user
-
+builddir
+build
+doc/html

@@ -48,7 +48,7 @@
             "displayName": "UniPi",
             "name": "unipi",
             "id": "c82bfe27-d14d-40bd-b12f-ddba214b5fc5",
-            "deviceClasses": [
+            "thingClasses": [
                 {
                     "id": "f9f5d5eb-a768-40da-af62-55b0b486a5e5",
                     "name": "uniPi1",
@@ -64,7 +64,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -83,7 +84,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -102,7 +104,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -121,7 +124,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -140,7 +144,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -159,7 +164,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -178,7 +184,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -197,7 +204,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -216,7 +224,8 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 },
@@ -254,6 +263,7 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
+                            "cached": false,
                             "defaultValue": false
                         }
                     ]
@@ -292,6 +302,7 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
+                            "cached": false,
                             "defaultValue": false
                         }
                     ]
@@ -318,6 +329,7 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
+                            "cached": false,
                             "defaultValue": false
                         }
                     ]
@@ -344,6 +356,7 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
+                            "cached": false,
                             "defaultValue": false
                         }
                     ]
@@ -370,6 +383,7 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
+                            "cached": false,
                             "defaultValue": false
                         }
                     ]
@@ -396,6 +410,7 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
+                            "cached": false,
                             "defaultValue": false
                         }
                     ]
@@ -422,6 +437,61 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connection changed",
                             "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "f59bfba2-0455-49f2-b92d-badfec5dcc01",
+                    "name": "neuronXS11",
+                    "displayName": "Neuron xS11",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "5b8d8149-f08a-451e-9766-08966f7f91c1",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "bf1acd53-f3c9-4654-a220-d36eb130cda2",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "0e11fbd3-8d4a-4fd8-aeeb-25ee2d134a17",
+                    "name": "neuronXS51",
+                    "displayName": "Neuron xS51",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "8f40b075-ebed-4ce1-b9e7-a37bb31656c4",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "f95875de-d5d5-4e7f-8873-3fe2615a0b11",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
                             "defaultValue": false
                         }
                     ]

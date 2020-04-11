@@ -78,6 +78,7 @@ public:
     bool getUserLED(const QString &circuit);
 private:
     int m_slaveAddress = 0;
+    uint m_responseTimeoutTime = 2000;
 
     QTimer *m_inputPollingTimer = nullptr;
     QTimer *m_outputPollingTimer = nullptr;
@@ -89,12 +90,16 @@ private:
     QHash<QString, int> m_modbusAnalogInputRegisters;
     QHash<QString, int> m_modbusAnalogOutputRegisters;
     QHash<QString, int> m_modbusUserLEDRegisters;
+    QList<QPair<QUuid, QModbusDataUnit>> m_writeRequestQueue;
+    QList<QModbusDataUnit> m_readRequestQueue;
 
     NeuronTypes m_neuronType = NeuronTypes::S103;
 
     QHash<int, uint16_t> m_previousModbusRegisterValue;
 
     bool loadModbusMap();
+    bool modbusReadRequest(QModbusDataUnit request);
+    bool modbusWriteRequest(QUuid requestId, QModbusDataUnit request);
 
     bool getInputRegisters(QList<int> registers);
     bool getHoldingRegisters(QList<int> registers);
@@ -113,8 +118,6 @@ signals:
 public slots:
     void onOutputPollingTimer();
     void onInputPollingTimer();
-
-    void onFinished();
 };
 
 #endif // NEURON_H
