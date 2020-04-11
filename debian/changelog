@@ -1,3 +1,10 @@
+nymea-plugin-unipi2 (0.1.4) xenial; urgency=medium
+
+  [ Bernhard Trinnes ]
+  * Add command queue and update to new API
+
+ -- Jenkins <jenkins@nymea.io>  Sat, 11 Apr 2020 12:42:30 +0200
+
 nymea-plugin-unipi2 (0.1.3) xenial; urgency=medium
 
   [ Bernhard Trinnes ]
