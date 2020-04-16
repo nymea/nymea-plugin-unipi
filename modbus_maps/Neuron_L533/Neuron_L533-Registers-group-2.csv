@@ -3,8 +3,6 @@ Via Unit 0,Via Unit 2,Register Count,R/W,Data Type,Content,Start Bit Nr.,Categor
 100,0,1,R,MixedBits,Digital Input 2.2,1,Basic
 100,0,1,R,MixedBits,Digital Input 2.3,2,Basic
 100,0,1,R,MixedBits,Digital Input 2.4,3,Basic
-100,0,1,R,MixedBits,Digital Input 2.5,4,Basic
-100,0,1,R,MixedBits,Digital Input 2.6,5,Basic
 101,1,1,RW,MixedBits,Relay Output 2.1,0,Basic
 101,1,1,RW,MixedBits,Relay Output 2.2,1,Basic
 101,1,1,RW,MixedBits,Relay Output 2.3,2,Basic
@@ -24,8 +22,10 @@ Via Unit 0,Via Unit 2,Register Count,R/W,Data Type,Content,Start Bit Nr.,Categor
 118,18,2,RW,DWord,Counter of Digital Input 2.2,,Basic
 120,20,2,RW,DWord,Counter of Digital Input 2.3,,Basic
 122,22,2,RW,DWord,Counter of Digital Input 2.4,,Basic
-124,24,2,RW,DWord,Counter of Digital Input 2.5,,Basic
-126,26,2,RW,DWord,Counter of Digital Input 2.6,,Basic
+124,24,1,W,Word,Reserved - Do Not Use,,Reserved
+125,25,1,W,Word,Reserved - Do Not Use,,Reserved
+126,26,1,W,Word,Reserved - Do Not Use,,Reserved
+127,27,1,W,Word,Reserved - Do Not Use,,Reserved
 128,28,1,RW,MixedBits,Synchronised DO/RO 2.1,0,Advanced
 128,28,1,RW,MixedBits,Synchronised DO/RO 2.2,1,Advanced
 128,28,1,RW,MixedBits,Synchronised DO/RO 2.3,2,Advanced
@@ -67,23 +67,20 @@ Via Unit 0,Via Unit 2,Register Count,R/W,Data Type,Content,Start Bit Nr.,Categor
 1111,1011,1,RW,Word,Debounce time (in 100us) for DI 2.2,,Advanced
 1112,1012,1,RW,Word,Debounce time (in 100us) for DI 2.3,,Advanced
 1113,1013,1,RW,Word,Debounce time (in 100us) for DI 2.4,,Advanced
-1114,1014,1,RW,Word,Debounce time (in 100us) for DI 2.5,,Advanced
-1115,1015,1,RW,Word,Debounce time (in 100us) for DI 2.6,,Advanced
-1116,1016,1,RW,MixedBits,Enable DirectSwitch on DI 2.1,0,Basic
-1116,1016,1,RW,MixedBits,Enable DirectSwitch on DI 2.2,1,Basic
-1116,1016,1,RW,MixedBits,Enable DirectSwitch on DI 2.3,2,Basic
-1116,1016,1,RW,MixedBits,Enable DirectSwitch on DI 2.4,3,Basic
-1116,1016,1,RW,MixedBits,Enable DirectSwitch on DI 2.5,4,Basic
-1117,1017,1,RW,MixedBits,Invert DirectSwitch Polarity on DI 2.1,0,Basic
-1117,1017,1,RW,MixedBits,Invert DirectSwitch Polarity on DI 2.2,1,Basic
-1117,1017,1,RW,MixedBits,Invert DirectSwitch Polarity on DI 2.3,2,Basic
-1117,1017,1,RW,MixedBits,Invert DirectSwitch Polarity on DI 2.4,3,Basic
-1117,1017,1,RW,MixedBits,Invert DirectSwitch Polarity on DI 2.5,4,Basic
-1118,1018,1,RW,MixedBits,Enable DirectSwitch Toggle on DI 2.1,0,Basic
-1118,1018,1,RW,MixedBits,Enable DirectSwitch Toggle on DI 2.2,1,Basic
-1118,1018,1,RW,MixedBits,Enable DirectSwitch Toggle on DI 2.3,2,Basic
-1118,1018,1,RW,MixedBits,Enable DirectSwitch Toggle on DI 2.4,3,Basic
-1118,1018,1,RW,MixedBits,Enable DirectSwitch Toggle on DI 2.5,4,Basic
+1114,1014,1,RW,MixedBits,Enable DirectSwitch on DI 2.1,0,Basic
+1114,1014,1,RW,MixedBits,Enable DirectSwitch on DI 2.2,1,Basic
+1114,1014,1,RW,MixedBits,Enable DirectSwitch on DI 2.3,2,Basic
+1114,1014,1,RW,MixedBits,Enable DirectSwitch on DI 2.4,3,Basic
+1115,1015,1,RW,MixedBits,Invert DirectSwitch Polarity on DI 2.1,0,Basic
+1115,1015,1,RW,MixedBits,Invert DirectSwitch Polarity on DI 2.2,1,Basic
+1115,1015,1,RW,MixedBits,Invert DirectSwitch Polarity on DI 2.3,2,Basic
+1115,1015,1,RW,MixedBits,Invert DirectSwitch Polarity on DI 2.4,3,Basic
+1116,1016,1,RW,MixedBits,Enable DirectSwitch Toggle on DI 2.1,0,Basic
+1116,1016,1,RW,MixedBits,Enable DirectSwitch Toggle on DI 2.2,1,Basic
+1116,1016,1,RW,MixedBits,Enable DirectSwitch Toggle on DI 2.3,2,Basic
+1116,1016,1,RW,MixedBits,Enable DirectSwitch Toggle on DI 2.4,3,Basic
+1117,1017,1,W,Word,Reserved - Do Not Use,,Reserved
+1118,1018,1,W,Word,Reserved - Do Not Use,,Reserved
 1119,1019,1,RW,Word,Analog Input Configuration(U/I/R) 2.1,,Basic
 1120,1020,1,RW,Word,Analog Input Configuration(U/I/R) 2.2,,Basic
 1121,1021,1,RW,Word,Analog Input Configuration(U/I/R) 2.3,,Basic
