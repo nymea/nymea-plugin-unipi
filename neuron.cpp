@@ -110,6 +110,8 @@ QString Neuron::type()
         return  "M403";
     case NeuronTypes::M503:
         return  "M503";
+    case NeuronTypes::M523:
+        return  "M523";
     case NeuronTypes::L203:
         return  "L203";
     case NeuronTypes::L303:
@@ -120,6 +122,10 @@ QString Neuron::type()
         return  "L503";
     case NeuronTypes::L513:
         return  "L513";
+    case NeuronTypes::L523:
+        return  "L523";
+    case NeuronTypes::L533:
+        return  "L533";
     }
     return "Unknown";
 }
@@ -176,9 +182,12 @@ bool Neuron::loadModbusMap()
         fileCoilList.append(QString("/Neuron_M403/Neuron_M403-Coils-group-2.csv"));
         break;
     case NeuronTypes::M503:
-
         fileCoilList.append(QString("/Neuron_M503/Neuron_M503-Coils-group-1.csv"));
         fileCoilList.append(QString("/Neuron_M503/Neuron_M503-Coils-group-2.csv"));
+        break;
+    case NeuronTypes::M523:
+        fileCoilList.append(QString("/Neuron_M523/Neuron_M523-Coils-group-1.csv"));
+        fileCoilList.append(QString("/Neuron_M523/Neuron_M523-Coils-group-2.csv"));
         break;
     case NeuronTypes::L203:
         fileCoilList.append(QString("/Neuron_L203/Neuron_L203-Coils-group-1.csv"));
@@ -204,6 +213,16 @@ bool Neuron::loadModbusMap()
         fileCoilList.append(QString("/Neuron_L513/Neuron_L513-Coils-group-1.csv"));
         fileCoilList.append(QString("/Neuron_L513/Neuron_L513-Coils-group-2.csv"));
         fileCoilList.append(QString("/Neuron_L513/Neuron_L513-Coils-group-3.csv"));
+        break;
+    case NeuronTypes::L523:
+        fileCoilList.append(QString("/Neuron_L523/Neuron_L523-Coils-group-1.csv"));
+        fileCoilList.append(QString("/Neuron_L523/Neuron_L523-Coils-group-2.csv"));
+        fileCoilList.append(QString("/Neuron_L523/Neuron_L523-Coils-group-3.csv"));
+        break;
+    case NeuronTypes::L533:
+        fileCoilList.append(QString("/Neuron_L533/Neuron_L533-Coils-group-1.csv"));
+        fileCoilList.append(QString("/Neuron_L533/Neuron_L533-Coils-group-2.csv"));
+        fileCoilList.append(QString("/Neuron_L533/Neuron_L533-Coils-group-3.csv"));
         break;
     }
 
@@ -270,6 +289,10 @@ bool Neuron::loadModbusMap()
         fileRegisterList.append(QString("/Neuron_M503/Neuron_M503-Registers-group-1.csv"));
         fileRegisterList.append(QString("/Neuron_M503/Neuron_M503-Registers-group-2.csv"));
         break;
+    case NeuronTypes::M523:
+        fileRegisterList.append(QString("/Neuron_M523/Neuron_M523-Registers-group-1.csv"));
+        fileRegisterList.append(QString("/Neuron_M523/Neuron_M523-Registers-group-2.csv"));
+        break;
     case NeuronTypes::L203:
         fileRegisterList.append(QString("/Neuron_L203/Neuron_L203-Registers-group-1.csv"));
         fileRegisterList.append(QString("/Neuron_L203/Neuron_L203-Registers-group-2.csv"));
@@ -294,6 +317,16 @@ bool Neuron::loadModbusMap()
         fileRegisterList.append(QString("/Neuron_L513/Neuron_L513-Registers-group-1.csv"));
         fileRegisterList.append(QString("/Neuron_L513/Neuron_L513-Registers-group-2.csv"));
         fileRegisterList.append(QString("/Neuron_L513/Neuron_L513-Registers-group-3.csv"));
+        break;
+    case NeuronTypes::L523:
+        fileRegisterList.append(QString("/Neuron_L523/Neuron_L523-Registers-group-1.csv"));
+        fileRegisterList.append(QString("/Neuron_L523/Neuron_L523-Registers-group-2.csv"));
+        fileRegisterList.append(QString("/Neuron_L523/Neuron_L523-Registers-group-3.csv"));
+        break;
+    case NeuronTypes::L533:
+        fileRegisterList.append(QString("/Neuron_L533/Neuron_L533-Registers-group-1.csv"));
+        fileRegisterList.append(QString("/Neuron_L533/Neuron_L533-Registers-group-2.csv"));
+        fileRegisterList.append(QString("/Neuron_L533/Neuron_L533-Registers-group-3.csv"));
         break;
     }
     foreach (QString relativeFilePath, fileRegisterList) {
@@ -801,11 +834,11 @@ bool Neuron::getUserLED(const QString &circuit)
 void Neuron::onOutputPollingTimer()
 {
     getAllDigitalOutputs();
-    //getAllAnalogOutputs();
+    getAllAnalogOutputs();
 }
 
 void Neuron::onInputPollingTimer()
 {
     getAllDigitalInputs();
-    //getAllAnalogInputs();
+    getAllAnalogInputs();
 }

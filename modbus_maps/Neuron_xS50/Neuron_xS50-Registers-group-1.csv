@@ -60,7 +60,7 @@ Via Unit 0,Via Unit 1,Register Count,R/W,Data Type,Content,Start Bit Nr.,Categor
 1004,1004,1,R,Word,Hardware ID,,Expert
 1005,1005,2,R,DWord,PCB Serial Number,,Expert
 1007,1007,1,RW,Word,Interrupt Mask,,Expert
-1008,1008,1,RW,Word,Group MasterWatchDog (MWD) Timeout (in 100us),,Advanced
+1008,1008,1,RW,Word,Group MasterWatchDog (MWD) Timeout (in 1ms),,Advanced
 1009,1009,1,R,Word,VRef of MCU,,Expert
 1010,1010,1,RW,Word,Debounce time (in 100us) for DI 1.1,,Advanced
 1011,1011,1,RW,Word,Debounce time (in 100us) for DI 1.2,,Advanced

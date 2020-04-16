@@ -41,11 +41,14 @@ public:
         M303,
         M403,
         M503,
+        M523,
         L203,
         L303,
         L403,
         L503,
-        L513
+        L513,
+        L523,
+        L533
     };
 
     explicit Neuron(NeuronTypes neuronType, QModbusTcpClient *modbusInterface, QObject *parent = nullptr);
