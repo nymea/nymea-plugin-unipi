@@ -1,0 +1,11 @@
+{
+    "title": "UniPi",
+    "tagline": "Integrates UniPi with nymea",
+    "icon": "anel.jpg",
+    "stability": "consumer",
+    "offline": true,
+    "categories": [
+        "sensor",
+        "plug"
+    ]
+}
