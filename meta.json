@@ -4,8 +4,10 @@
     "icon": "unipi.png",
     "stability": "consumer",
     "offline": true,
-    "technology": [
-        "network"
+    "technologies": [
+        "network",
+        "serial-port",
+        "i2c"
     ],
     "categories": [
         "relay"
