@@ -6,8 +6,7 @@
     "offline": true,
     "technologies": [
         "network",
-        "serial-port",
-        "i2c"
+        "serial-port"
     ],
     "categories": [
         "relay"
