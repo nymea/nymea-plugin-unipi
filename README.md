@@ -6,7 +6,7 @@ This plug-in does not make use of Evok, it communicates
 directly with the Modbus TCP layer, or over Modbus RTU with the Neuron extensions.
 To add one-wire devices, use the nymea onewire plug-in.
 
-## Supported Devices
+## Supported Things
 
 * UniPi 1.1
 * UniPi 1.1 light
