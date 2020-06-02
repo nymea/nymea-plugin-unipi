@@ -504,7 +504,11 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
             bool stateValue = action.param(digitalOutputPowerActionPowerParamTypeId).value().toBool();
 
             if (m_unipi) {
-                m_unipi->setDigitalOutput(digitalOutputNumber, stateValue);
+                if(m_unipi->setDigitalOutput(digitalOutputNumber, stateValue)) {
+                    info->finish(Thing::ThingErrorNoError);
+                } else {
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                }
             } else if (m_neurons.contains(thing->parentId())) {
                 Neuron *neuron = m_neurons.value(thing->parentId());
                 QUuid requestId = neuron->setDigitalOutput(digitalOutputNumber, stateValue);
@@ -540,7 +544,11 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
             double analogValue = action.param(analogOutputOutputValueActionOutputValueParamTypeId).value().toDouble();
 
             if (m_unipi) {
-                m_unipi->setAnalogOutput(analogOutputNumber, analogValue);
+                if(m_unipi->setAnalogOutput(analogOutputNumber, analogValue)) {
+                    info->finish(Thing::ThingErrorNoError);
+                } else {
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                }
             } else if (m_neurons.contains(thing->parentId())) {
                 Neuron *neuron = m_neurons.value(thing->parentId());
                 QUuid requestId = neuron->setAnalogOutput(analogOutputNumber, analogValue);
