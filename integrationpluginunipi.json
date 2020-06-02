@@ -517,7 +517,8 @@
                             "displayName": "Digital input",
                             "displayNameEvent": "Digital input changed",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "ioType": "digitalInput"
                         }
                     ]
                 },
@@ -544,7 +545,8 @@
                             "displayNameEvent": "digital output changed",
                             "type": "bool",
                             "defaultValue": false,
-                            "writable": true
+                            "writable": true,
+                            "ioType": "digitalOutput"
                         }
                     ]
                 },
@@ -574,7 +576,8 @@
                             "minValue": 0.00,
                             "maxValue": 10.00,
                             "defaultValue": 0.00,
-                            "writable": true
+                            "writable": true,
+                            "ioType": "analogOutput"
                         }
                     ]
                 },
@@ -600,7 +603,10 @@
                             "displayNameEvent": "Analog input changed",
                             "type": "double",
                             "unit": "Volt",
-                            "defaultValue": 0.00
+                            "defaultValue": 0.00,
+                            "minValue": 0.00,
+                            "maxValue": 10.00,
+                            "ioType": "analogInput"
                         }
                     ]
                 },

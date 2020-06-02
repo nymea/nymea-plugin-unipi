@@ -139,7 +139,11 @@ The name of the StateType ({2296f575-cc53-48ef-9086-6a412abfdde5}) of ThingClass
     </message>
     <message>
         <source>Connection changed</source>
-        <extracomment>The name of the EventType ({25b0eaa7-14eb-49ea-a869-13b1ea3bd294}) of ThingClass neuronXS50
+        <extracomment>The name of the EventType ({f95875de-d5d5-4e7f-8873-3fe2615a0b11}) of ThingClass neuronXS51
+----------
+The name of the EventType ({bf1acd53-f3c9-4654-a220-d36eb130cda2}) of ThingClass neuronXS11
+----------
+The name of the EventType ({25b0eaa7-14eb-49ea-a869-13b1ea3bd294}) of ThingClass neuronXS50
 ----------
 The name of the EventType ({7caea8c3-ac29-42fb-835b-beec7fa1ce20}) of ThingClass neuronXS40
 ----------
@@ -178,7 +182,15 @@ The name of the EventType ({6f4914c1-fce8-4b7a-a73b-ad8a2f4a08ec}) of ThingClass
     </message>
     <message>
         <source>Connected</source>
-        <extracomment>The name of the ParamType (ThingClass: neuronXS50, EventType: connected, ID: {25b0eaa7-14eb-49ea-a869-13b1ea3bd294})
+        <extracomment>The name of the ParamType (ThingClass: neuronXS51, EventType: connected, ID: {f95875de-d5d5-4e7f-8873-3fe2615a0b11})
+----------
+The name of the StateType ({f95875de-d5d5-4e7f-8873-3fe2615a0b11}) of ThingClass neuronXS51
+----------
+The name of the ParamType (ThingClass: neuronXS11, EventType: connected, ID: {bf1acd53-f3c9-4654-a220-d36eb130cda2})
+----------
+The name of the StateType ({bf1acd53-f3c9-4654-a220-d36eb130cda2}) of ThingClass neuronXS11
+----------
+The name of the ParamType (ThingClass: neuronXS50, EventType: connected, ID: {25b0eaa7-14eb-49ea-a869-13b1ea3bd294})
 ----------
 The name of the StateType ({25b0eaa7-14eb-49ea-a869-13b1ea3bd294}) of ThingClass neuronXS50
 ----------
@@ -271,7 +283,11 @@ The name of the ParamType (ThingClass: digitalInput, Type: thing, ID: {9c84d9b8-
     </message>
     <message>
         <source>Modbus slave address</source>
-        <extracomment>The name of the ParamType (ThingClass: neuronXS50, Type: thing, ID: {6d01f6b3-7c3c-4fc8-acf2-dc9811340a76})
+        <extracomment>The name of the ParamType (ThingClass: neuronXS51, Type: thing, ID: {8f40b075-ebed-4ce1-b9e7-a37bb31656c4})
+----------
+The name of the ParamType (ThingClass: neuronXS11, Type: thing, ID: {5b8d8149-f08a-451e-9766-08966f7f91c1})
+----------
+The name of the ParamType (ThingClass: neuronXS50, Type: thing, ID: {6d01f6b3-7c3c-4fc8-acf2-dc9811340a76})
 ----------
 The name of the ParamType (ThingClass: neuronXS40, Type: thing, ID: {6b2da1ee-5cae-4325-913e-21d26d5909c3})
 ----------
@@ -385,6 +401,16 @@ The name of the ParamType (ThingClass: neuronXS10, Type: thing, ID: {c105e97a-1e
     <message>
         <source>User LED</source>
         <extracomment>The name of the ThingClass ({6a87e9b3-7f3d-4b7c-8958-905ec039ef57})</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Neuron xS11</source>
+        <extracomment>The name of the ThingClass ({f59bfba2-0455-49f2-b92d-badfec5dcc01})</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Neuron xS51</source>
+        <extracomment>The name of the ThingClass ({0e11fbd3-8d4a-4fd8-aeeb-25ee2d134a17})</extracomment>
         <translation type="unfinished"></translation>
     </message>
 </context>
