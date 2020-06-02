@@ -1,3 +1,12 @@
+nymea-plugin-unipi2 (0.1.5) xenial; urgency=medium
+
+  [ Bernhard Trinnes ]
+  * Generic IOs
+  * Rework readmes
+  * Fix UniPi 1 Actions
+
+ -- Jenkins <jenkins@nymea.io>  Tue, 02 Jun 2020 21:02:32 +0200
+
 nymea-plugin-unipi2 (0.1.4) xenial; urgency=medium
 
   [ Bernhard Trinnes ]
