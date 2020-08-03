@@ -30,22 +30,17 @@ General Features:
 	* Neuron TCP modbus server must be installed.
 * Neuron Extensions
 	* Set the DIP settings accordind to the plug-in settings
-
 * General requirements:
 	* The package "nymea-plugin-unipi2" must be installed
 	* For one-wire sensors the package "nymea-plugin-onewire" must be installed.
 
-
 ### Device setup for Neuron devices
 
-Install the Neuron Modbus TCP Layer:
+The nymea unipi plug-in requires the Neuron UniPi Kernel for Neuron devices, this is not required for Neuron Extensions or UniPi 1.1. To install the kernel module follow the instuctions in the UniPi knowledge base.
 
-* wget https://github.com/UniPiTechnology/neuron-tcp-modbus-overlay/archive/v.1.0.3.zip
-* unzip v.1.0.3.zip
-* cd neuron-tcp-modbus-overlay-v.1.0.3/
-* sudo bash install.sh
+https://kb.unipi.technology/en:sw:04-unipi-firmware
 
-Before you can add IOs you need to setup the UniPi Gateway device, after that nymea
+Before you can add IOs you need to setup the UniPi Gateway device inside nymea, after that nymea
 recognises the available IOs.
 
 ## More
