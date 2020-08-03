@@ -8,8 +8,6 @@ Via Unit 0,Via Unit 3,R/W,Content,Category
 206,6,R,Digital Input 3.2,Basic
 207,7,R,Digital Input 3.3,Basic
 208,8,R,Digital Input 3.4,Basic
-209,9,R,Digital Input 3.5,Basic
-210,10,R,Digital Input 3.6,Basic
 1200,1000,RW,MWD reset indication,Advanced
 1202,1002,R,Reset group MCU,Advanced
 1203,1003,RW,Save current configuration and use on startup,Advanced
@@ -20,14 +18,11 @@ Via Unit 0,Via Unit 3,R/W,Content,Category
 1208,1008,RW,Enable DirectSwitch on DI 3.2,Advanced
 1209,1009,RW,Enable DirectSwitch on DI 3.3,Advanced
 1210,1010,RW,Enable DirectSwitch on DI 3.4,Advanced
-1211,1011,RW,Enable DirectSwitch on DI 3.5,Advanced
-1212,1012,RW,Invert DirectSwitch Polarity on DI 3.1,Advanced
-1213,1013,RW,Invert DirectSwitch Polarity on DI 3.2,Advanced
-1214,1014,RW,Invert DirectSwitch Polarity on DI 3.3,Advanced
-1215,1015,RW,Invert DirectSwitch Polarity on DI 3.4,Advanced
-1216,1016,RW,Invert DirectSwitch Polarity on DI 3.5,Advanced
-1217,1017,RW,Enable DirectSwitch Toggle Mode on DI 3.1,Advanced
-1218,1018,RW,Enable DirectSwitch Toggle Mode on DI 3.2,Advanced
-1219,1019,RW,Enable DirectSwitch Toggle Mode on DI 3.3,Advanced
-1220,1020,RW,Enable DirectSwitch Toggle Mode on DI 3.4,Advanced
-1221,1021,RW,Enable DirectSwitch Toggle Mode on DI 3.5,Advanced
+1211,1011,RW,Invert DirectSwitch Polarity on DI 3.1,Advanced
+1212,1012,RW,Invert DirectSwitch Polarity on DI 3.2,Advanced
+1213,1013,RW,Invert DirectSwitch Polarity on DI 3.3,Advanced
+1214,1014,RW,Invert DirectSwitch Polarity on DI 3.4,Advanced
+1215,1015,RW,Enable DirectSwitch Toggle Mode on DI 3.1,Advanced
+1216,1016,RW,Enable DirectSwitch Toggle Mode on DI 3.2,Advanced
+1217,1017,RW,Enable DirectSwitch Toggle Mode on DI 3.3,Advanced
+1218,1018,RW,Enable DirectSwitch Toggle Mode on DI 3.4,Advanced

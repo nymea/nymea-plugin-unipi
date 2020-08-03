@@ -716,11 +716,11 @@ bool NeuronExtension::getUserLED(const QString &circuit)
 void NeuronExtension::onOutputPollingTimer()
 {
     getAllDigitalOutputs();
-    //getAllAnalogOutputs();
+    getAllAnalogOutputs();
 }
 
 void NeuronExtension::onInputPollingTimer()
 {
     getAllDigitalInputs();
-    //getAllAnalogInputs();
+    getAllAnalogInputs();
 }

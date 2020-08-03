@@ -1,12 +1,12 @@
 Via Unit 0,Via Unit 2,R/W,Content,Category
-100,0,RW,Digital Output 2.1,Basic
-101,1,RW,Digital Output 2.2,Basic
-102,2,RW,Digital Output 2.3,Basic
-103,3,RW,Digital Output 2.4,Basic
-104,4,RW,Digital Output 2.5,Basic
-105,5,RW,Digital Output 2.6,Basic
-106,6,RW,Digital Output 2.7,Basic
-107,7,RW,Digital Output 2.8,Basic
+100,0,RW,Relay Output 2.1,Basic
+101,1,RW,Relay Output 2.2,Basic
+102,2,RW,Relay Output 2.3,Basic
+103,3,RW,Relay Output 2.4,Basic
+104,4,RW,Relay Output 2.5,Basic
+105,5,RW,Relay Output 2.6,Basic
+106,6,RW,Relay Output 2.7,Basic
+107,7,RW,Relay Output 2.8,Basic
 108,8,R,Digital Input 2.1,Basic
 109,9,R,Digital Input 2.2,Basic
 110,10,R,Digital Input 2.3,Basic
