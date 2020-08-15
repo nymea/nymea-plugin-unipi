@@ -144,7 +144,7 @@ QList<QString> UniPi::digitalOutputs()
     QList<QString> outputs;
     switch (m_unipiType) {
     case UniPiType::UniPi1:
-        for (int i = 1; i < 7; ++i) {
+        for (int i = 1; i < 9; ++i) {
             outputs.append(QString("DO%1").arg(i));
         }
         break;
