@@ -294,22 +294,20 @@ bool NeuronExtension::loadModbusMap()
     return true;
 }
 
-
-
-bool NeuronExtension::modbusReadRequest(QModbusDataUnit request)
+bool NeuronExtension::modbusReadRequest(const QModbusDataUnit &request)
 {
     if (!m_modbusInterface)
         return false;
 
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [reply, this] {
-                reply->deleteLater();
+
                 int modbusAddress = 0;
 
                 if (!m_readRequestQueue.isEmpty()) {
-                    QModbusDataUnit request = m_readRequestQueue.takeFirst();
-                    modbusReadRequest(request);
+                    modbusReadRequest(m_readRequestQueue.takeFirst());
                 }
 
                 if (reply->error() == QModbusDevice::NoError) {
@@ -386,23 +384,22 @@ bool NeuronExtension::modbusReadRequest(QModbusDataUnit request)
 }
 
 
-bool NeuronExtension::modbusWriteRequest(QUuid requestId, QModbusDataUnit request)
+bool NeuronExtension::modbusWriteRequest(const Request &request)
 {
     if (!m_modbusInterface)
         return false;
 
-    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
+    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request.Data, m_slaveAddress)) {
         if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
-                reply->deleteLater();
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [reply, request, this] {
 
                 if (!m_writeRequestQueue.isEmpty()) {
-                    QPair<QUuid, QModbusDataUnit> request = m_writeRequestQueue.takeFirst();
-                    modbusWriteRequest(request.first, request.second);
+                    modbusWriteRequest(m_writeRequestQueue.takeFirst());
                 }
 
                 if (reply->error() == QModbusDevice::NoError) {
-                    requestExecuted(requestId, true);
+                    requestExecuted(request.Id, true);
                     const QModbusDataUnit unit = reply->result();
                     int modbusAddress = unit.startAddress();
                     if(m_modbusDigitalOutputRegisters.values().contains(modbusAddress)){
@@ -416,9 +413,9 @@ bool NeuronExtension::modbusWriteRequest(QUuid requestId, QModbusDataUnit reques
                         emit userLEDStatusChanged(circuit, unit.value(0));
                     }
                 } else {
-                    requestExecuted(requestId, false);
+                    requestExecuted(request.Id, false);
                     qCWarning(dcUniPi()) << "Read response error:" << reply->error();
-                    emit requestError(requestId, reply->errorString());
+                    emit requestError(request.Id, reply->errorString());
                 }
             });
             QTimer::singleShot(m_responseTimeoutTime, reply, &QModbusReply::deleteLater);
@@ -462,20 +459,21 @@ QUuid NeuronExtension::setDigitalOutput(const QString &circuit, bool value)
     if (!m_modbusInterface)
         return "";
 
-    QUuid requestId = QUuid::createUuid();
+    Request request;
+    request.Id = QUuid::createUuid();
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
-    request.setValue(0, static_cast<uint16_t>(value));
+    request.Data = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
+    request.Data.setValue(0, static_cast<uint16_t>(value));
 
     if (m_writeRequestQueue.isEmpty()) {
-        modbusWriteRequest(requestId, request);
+        modbusWriteRequest(requestId);
     } else if (m_writeRequestQueue.length() > 100) {
         return "";
     } else {
-        m_writeRequestQueue.append(QPair<QUuid, QModbusDataUnit>(requestId, request));
+        m_writeRequestQueue.append(request);
     }
 
-    return requestId;
+    return request.Id;
 }
 
 bool NeuronExtension::getDigitalOutput(const QString &circuit)
@@ -619,20 +617,20 @@ QUuid NeuronExtension::setAnalogOutput(const QString &circuit, double value)
     if (!m_modbusInterface)
         return "";
 
-    QUuid requestId = QUuid::createUuid();
-
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
-    request.setValue(0, static_cast<uint16_t>(value));
+    Request request;
+    request.Id = QUuid::createUuid();
+    request.Data = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
+    request.Data.setValue(0, static_cast<uint16_t>(value));
 
     if (m_writeRequestQueue.isEmpty()) {
-        modbusWriteRequest(requestId, request);
+        modbusWriteRequest(request);
     } else if (m_writeRequestQueue.length() > 100) {
         return "";
     } else {
-        m_writeRequestQueue.append(QPair<QUuid, QModbusDataUnit>(requestId, request));
+        m_writeRequestQueue.append(request);
     }
 
-    return requestId;
+    return request.Id;
 }
 
 
@@ -683,20 +681,21 @@ QUuid NeuronExtension::setUserLED(const QString &circuit, bool value)
     if (!m_modbusInterface)
         return "";
 
-    QUuid requestId = QUuid::createUuid();
+    Request request;
+    request.Id = QUuid::createUuid();
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
-    request.setValue(0, static_cast<uint16_t>(value));
+    request.Data = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
+    request.Data.setValue(0, static_cast<uint16_t>(value));
 
     if (m_writeRequestQueue.isEmpty()) {
-        modbusWriteRequest(requestId, request);
+        modbusWriteRequest(request);
     } else if (m_writeRequestQueue.length() > 100) {
         return "";
     } else {
-        m_writeRequestQueue.append(QPair<QUuid, QModbusDataUnit>(requestId, request));
+        m_writeRequestQueue.append(request);
     }
 
-    return requestId;
+    return request.Id;
 }
 
 

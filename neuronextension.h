@@ -42,6 +42,11 @@ class NeuronExtension : public QObject
     Q_OBJECT
 public:
 
+    struct Request {
+        QUuid Id;
+        QModbusDataUnit Data;
+    };
+
     enum ExtensionTypes {
         xS10,
         xS20,
@@ -92,7 +97,7 @@ private:
     QHash<QString, int> m_modbusAnalogInputRegisters;
     QHash<QString, int> m_modbusAnalogOutputRegisters;
     QHash<QString, int> m_modbusUserLEDRegisters;
-    QList<QPair<QUuid, QModbusDataUnit>> m_writeRequestQueue;
+    QList<Request> m_writeRequestQueue;
     QList<QModbusDataUnit> m_readRequestQueue;
 
     QModbusRtuSerialMaster *m_modbusInterface = nullptr;
@@ -101,19 +106,19 @@ private:
     QHash<int, uint16_t> m_previousModbusRegisterValue;
 
     bool loadModbusMap();
-    bool modbusWriteRequest(QUuid requestId, QModbusDataUnit request);    
-    bool modbusReadRequest(QModbusDataUnit request);
+    bool modbusWriteRequest(const Request &request);
+    bool modbusReadRequest(const QModbusDataUnit &request);
 
 signals:
-    void requestExecuted(QUuid requestId, bool success);
-    void requestError(QUuid requestId, const QString &error);
-    void digitalInputStatusChanged(QString &circuit, bool value);
-    void digitalOutputStatusChanged(QString &circuit, bool value);
+    void requestExecuted(const QUuid &requestId, bool success);
+    void requestError(const QUuid &requestId, const QString &error);
+    void digitalInputStatusChanged(const QString &circuit, bool value);
+    void digitalOutputStatusChanged(const QString &circuit, bool value);
 
-    void analogInputStatusChanged(QString &circuit, double value);
-    void analogOutputStatusChanged(QString &circuit, double value);
+    void analogInputStatusChanged(const QString &circuit, double value);
+    void analogOutputStatusChanged(const QString &circuit, double value);
 
-    void userLEDStatusChanged(QString &circuit, bool value);
+    void userLEDStatusChanged(const QString &circuit, bool value);
 
     void connectionStateChanged(bool state);
 
