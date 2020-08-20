@@ -66,40 +66,35 @@ bool UniPi::init()
 
     //Init Raspberry Pi Inputs
     foreach (QString circuit, digitalInputs()){
-        int pin = getPinFromCircuit(circuit);
-        QProcess::execute(QString("gpio -g mode %1 up").arg(pin));
 
-        GpioMonitor *gpio = new GpioMonitor(pin, this);
-        if (!gpio->enable()) {
+        int pin = getPinFromCircuit(circuit);
+
+        GpioMonitor *gpioMonitor = new GpioMonitor(pin, this);
+        if (!gpioMonitor->enable()) {
             qCWarning(dcUniPi()) << "Could not enable gpio monitor for pin" << pin;
             return false;
         } else {
-            QTimer::singleShot(1000, [gpio, circuit, this]() {
-                emit digitalInputStatusChanged(circuit, gpio->value()); //set initial status
-                connect(gpio, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
-                m_monitorGpios.insert(gpio, circuit);
+            QProcess::execute(QString("gpio -g mode %1 up").arg(pin));
+            QTimer::singleShot(1000, [gpioMonitor, circuit, this]() {
+                emit digitalInputStatusChanged(circuit, gpioMonitor->value()); //set initial status
+                connect(gpioMonitor, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
+                m_monitorGpios.insert(gpioMonitor, circuit);
             });
         }
     }
 
-    // In case of re-init
-    if (!m_pwms.isEmpty()) {
-        foreach (Pwm *pwm, m_pwms.keys()) {
-            m_pwms.remove(pwm);
-            pwm->deleteLater();
-        }
+    //Init Raspberry Pi PWM output
+    if (m_analogOutput) {
+        delete m_analogOutput;
     }
-
-    //Init Raspberry Pi PWM outputs
-    foreach (QString circuit, analogOutputs()) {
-        int pin = getPinFromCircuit(circuit);
-        Pwm *pwm = new Pwm(pin, this);
-        pwm->enable();
-        pwm->setPolarity(Pwm::PolarityNormal);
-        pwm->setFrequency(400);
-        pwm->setPercentage(0);
-        m_pwms.insert(pwm, circuit);
+    m_analogOutput = new Pwm(0, this);
+    if (!m_analogOutput->enable()) {
+        qCWarning(dcUniPi()) << "Error could not enable analog output";
+        return false;
     }
+    m_analogOutput->setPolarity(Pwm::PolarityNormal);
+    m_analogOutput->setFrequency(400);
+    m_analogOutput->setPercentage(0);
 
     if (!m_i2cManager->open(m_analogChannel1)) {
         qCDebug(dcUniPi()) << "Failed to open analog channel 1";
@@ -110,6 +105,7 @@ bool UniPi::init()
             qCWarning(dcUniPi()) << "Error reading from analog channel 1";
             return;
         }
+        qCDebug(dcUniPi()) << "Received data from analog channel 1" << data[0] << data[1];
         double voltage = data[0];
         emit analogInputStatusChanged("AI01", voltage);
     });
@@ -124,6 +120,7 @@ bool UniPi::init()
             qCWarning(dcUniPi()) << "Error reading from analog channel 2";
             return;
         }
+        qCDebug(dcUniPi()) << "Received data from analog channel 2" << data[0] << data[1];
         double voltage = data[0];
         emit analogInputStatusChanged("AI02", voltage);
     });
@@ -371,34 +368,20 @@ bool UniPi::getDigitalInput(const QString &circuit)
     return true;
 }
 
-bool UniPi::setAnalogOutput(const QString &circuit, double value)
+bool UniPi::setAnalogOutput(double value)
 {
-    int pin = getPinFromCircuit(circuit);
-    if (pin == 0) {
-        qWarning(dcUniPi()) << "Out of range pin number";
-        return false;
-    }
-    if (!m_pwms.values().contains(circuit))
-        return false;
     int percentage = value * 10;     //convert volt to percentage
-    Pwm *pwm = m_pwms.key(circuit);
-    if(!pwm->setPercentage(percentage))
+    if(!m_analogOutput->setPercentage(percentage))
         return false;
 
-    getAnalogOutput(circuit);
+    getAnalogOutput();
     return true;
 }
 
-bool UniPi::getAnalogOutput(const QString &circuit)
+bool UniPi::getAnalogOutput()
 {
-    int pin = getPinFromCircuit(circuit);
-    if (pin == 0) {
-        qWarning(dcUniPi()) << "Out of range pin number";
-        return false;
-    }
-    Pwm *pwm = m_pwms.key(circuit);
-    double voltage = pwm->percentage()/10.0;
-    emit analogOutputStatusChanged(circuit, voltage);
+    double voltage = m_analogOutput->percentage()/10.0;
+    emit analogOutputStatusChanged(voltage);
 
     return true;
 }

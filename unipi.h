@@ -55,7 +55,6 @@ public:
     };
 
     explicit UniPi(I2CManager *i2cManager, UniPiType unipiType, QObject *parent = nullptr);
-    ~UniPi();
 
     bool init();
     QString type();
@@ -64,8 +63,8 @@ public:
     bool getDigitalOutput(const QString &circuit);
     bool getDigitalInput(const QString &circuit);
 
-    bool setAnalogOutput(const QString &circuit, double value);
-    bool getAnalogOutput(const QString &circuit);
+    bool setAnalogOutput(double value);
+    bool getAnalogOutput();
 
     QList<QString> digitalInputs();
     QList<QString> digitalOutputs();
@@ -83,13 +82,13 @@ private:
 
     int getPinFromCircuit(const QString &cicuit);
     QHash<GpioMonitor *, QString> m_monitorGpios;
-    QHash<Pwm *, QString> m_pwms;
+    Pwm *m_analogOutput = nullptr;
 
 signals:
     void digitalOutputStatusChanged(const QString &circuit, const bool &value);
     void digitalInputStatusChanged(const QString &circuit, const bool &value);
     void analogInputStatusChanged(const QString &circuit, double value);
-    void analogOutputStatusChanged(const QString &circuit, double value);
+    void analogOutputStatusChanged(double value);
 
 private slots:
     void onInputValueChanged(const bool &value);
