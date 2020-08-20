@@ -42,7 +42,7 @@ UniPi::UniPi(I2CManager *i2cManager, UniPiType unipiType, QObject *parent) :
     m_analogInputChannel1 = new MCP342XChannel("i2c-1", 0x68, 0, MCP342XChannel::Gain_1, this);
     m_analogInputChannel2 = new MCP342XChannel("i2c-1", 0x68, 1, MCP342XChannel::Gain_1, this);
 
-    m_analogOutput = new Pwm(0, this);
+    m_analogOutput = new UniPiPwm(0, this);
 }
 
 UniPi::~UniPi()
