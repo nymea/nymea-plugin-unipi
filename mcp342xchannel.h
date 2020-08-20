@@ -41,6 +41,14 @@ class MCP342XChannel: public I2CDevice
     Q_OBJECT
 public:
 
+    /* Resolution  |  LSB
+     * ---------------------
+     * 12 bits     |  1 mV
+     * 14 bits     |  250 μV
+     * 16 bits     |  62.5 μV
+     * 18 bits     |  15.625 μ
+     */
+
     enum Gain {
         Gain_1 = 0,
         Gain_2 = 1,

@@ -48,7 +48,6 @@ MCP342XChannel::MCP342XChannel(const QString &portName, int address, int channel
 
 }
 
-
 QByteArray MCP342XChannel::readData(int fd)
 {
     // Start a configuration conversation
