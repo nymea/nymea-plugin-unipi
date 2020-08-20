@@ -389,7 +389,7 @@ bool NeuronExtension::modbusWriteRequest(const Request &request)
     if (!m_modbusInterface)
         return false;
 
-    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request.Data, m_slaveAddress)) {
+    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request.data, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [reply, request, this] {
@@ -399,7 +399,7 @@ bool NeuronExtension::modbusWriteRequest(const Request &request)
                 }
 
                 if (reply->error() == QModbusDevice::NoError) {
-                    requestExecuted(request.Id, true);
+                    requestExecuted(request.id, true);
                     const QModbusDataUnit unit = reply->result();
                     int modbusAddress = unit.startAddress();
                     if(m_modbusDigitalOutputRegisters.values().contains(modbusAddress)){
@@ -413,9 +413,9 @@ bool NeuronExtension::modbusWriteRequest(const Request &request)
                         emit userLEDStatusChanged(circuit, unit.value(0));
                     }
                 } else {
-                    requestExecuted(request.Id, false);
+                    requestExecuted(request.id, false);
                     qCWarning(dcUniPi()) << "Read response error:" << reply->error();
-                    emit requestError(request.Id, reply->errorString());
+                    emit requestError(request.id, reply->errorString());
                 }
             });
             QTimer::singleShot(m_responseTimeoutTime, reply, &QModbusReply::deleteLater);
@@ -460,20 +460,20 @@ QUuid NeuronExtension::setDigitalOutput(const QString &circuit, bool value)
         return "";
 
     Request request;
-    request.Id = QUuid::createUuid();
+    request.id = QUuid::createUuid();
 
-    request.Data = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
-    request.Data.setValue(0, static_cast<uint16_t>(value));
+    request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
+    request.data.setValue(0, static_cast<uint16_t>(value));
 
     if (m_writeRequestQueue.isEmpty()) {
-        modbusWriteRequest(requestId);
+        modbusWriteRequest(request);
     } else if (m_writeRequestQueue.length() > 100) {
         return "";
     } else {
         m_writeRequestQueue.append(request);
     }
 
-    return request.Id;
+    return request.id;
 }
 
 bool NeuronExtension::getDigitalOutput(const QString &circuit)
@@ -618,9 +618,9 @@ QUuid NeuronExtension::setAnalogOutput(const QString &circuit, double value)
         return "";
 
     Request request;
-    request.Id = QUuid::createUuid();
-    request.Data = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
-    request.Data.setValue(0, static_cast<uint16_t>(value));
+    request.id = QUuid::createUuid();
+    request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
+    request.data.setValue(0, static_cast<uint16_t>(value));
 
     if (m_writeRequestQueue.isEmpty()) {
         modbusWriteRequest(request);
@@ -630,7 +630,7 @@ QUuid NeuronExtension::setAnalogOutput(const QString &circuit, double value)
         m_writeRequestQueue.append(request);
     }
 
-    return request.Id;
+    return request.id;
 }
 
 
@@ -682,10 +682,10 @@ QUuid NeuronExtension::setUserLED(const QString &circuit, bool value)
         return "";
 
     Request request;
-    request.Id = QUuid::createUuid();
+    request.id = QUuid::createUuid();
 
-    request.Data = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
-    request.Data.setValue(0, static_cast<uint16_t>(value));
+    request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
+    request.data.setValue(0, static_cast<uint16_t>(value));
 
     if (m_writeRequestQueue.isEmpty()) {
         modbusWriteRequest(request);
@@ -695,7 +695,7 @@ QUuid NeuronExtension::setUserLED(const QString &circuit, bool value)
         m_writeRequestQueue.append(request);
     }
 
-    return request.Id;
+    return request.id;
 }
 
 

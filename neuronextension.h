@@ -43,8 +43,8 @@ class NeuronExtension : public QObject
 public:
 
     struct Request {
-        QUuid Id;
-        QModbusDataUnit Data;
+        QUuid id;
+        QModbusDataUnit data;
     };
 
     enum ExtensionTypes {
