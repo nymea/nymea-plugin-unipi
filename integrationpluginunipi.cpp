@@ -726,7 +726,7 @@ void IntegrationPluginUniPi::onNeuronConnectionStateChanged(bool state)
     thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), state);
 }
 
-void IntegrationPluginUniPi::onNeuronDigitalInputStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronDigitalInputStatusChanged(const QString &circuit, bool value)
 {
     Neuron *neuron = static_cast<Neuron *>(sender());
 
@@ -741,7 +741,7 @@ void IntegrationPluginUniPi::onNeuronDigitalInputStatusChanged(QString &circuit,
     }
 }
 
-void IntegrationPluginUniPi::onNeuronExtensionDigitalInputStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronExtensionDigitalInputStatusChanged(const QString &circuit, bool value)
 {
     NeuronExtension *neuronExtension = static_cast<NeuronExtension *>(sender());
 
@@ -756,7 +756,7 @@ void IntegrationPluginUniPi::onNeuronExtensionDigitalInputStatusChanged(QString 
     }
 }
 
-void IntegrationPluginUniPi::onNeuronDigitalOutputStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronDigitalOutputStatusChanged(const QString &circuit, bool value)
 {
     Neuron *neuron = static_cast<Neuron *>(sender());
 
@@ -771,7 +771,7 @@ void IntegrationPluginUniPi::onNeuronDigitalOutputStatusChanged(QString &circuit
     }
 }
 
-void IntegrationPluginUniPi::onNeuronExtensionDigitalOutputStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronExtensionDigitalOutputStatusChanged(const QString &circuit, bool value)
 {
     NeuronExtension *neuronExtension = static_cast<NeuronExtension *>(sender());
 
@@ -786,7 +786,7 @@ void IntegrationPluginUniPi::onNeuronExtensionDigitalOutputStatusChanged(QString
     }
 }
 
-void IntegrationPluginUniPi::onNeuronAnalogInputStatusChanged(QString &circuit, double value)
+void IntegrationPluginUniPi::onNeuronAnalogInputStatusChanged(const QString &circuit, double value)
 {
     Neuron *neuron = static_cast<Neuron *>(sender());
 
@@ -801,7 +801,7 @@ void IntegrationPluginUniPi::onNeuronAnalogInputStatusChanged(QString &circuit, 
     }
 }
 
-void IntegrationPluginUniPi::onNeuronExtensionAnalogInputStatusChanged(QString &circuit, double value)
+void IntegrationPluginUniPi::onNeuronExtensionAnalogInputStatusChanged(const QString &circuit, double value)
 {
     NeuronExtension *neuronExtension = static_cast<NeuronExtension *>(sender());
 
@@ -815,7 +815,7 @@ void IntegrationPluginUniPi::onNeuronExtensionAnalogInputStatusChanged(QString &
     }
 }
 
-void IntegrationPluginUniPi::onNeuronAnalogOutputStatusChanged(QString &circuit, double value)
+void IntegrationPluginUniPi::onNeuronAnalogOutputStatusChanged(const QString &circuit, double value)
 {
     Neuron *neuron = static_cast<Neuron *>(sender());
 
@@ -830,7 +830,7 @@ void IntegrationPluginUniPi::onNeuronAnalogOutputStatusChanged(QString &circuit,
     }
 }
 
-void IntegrationPluginUniPi::onNeuronExtensionAnalogOutputStatusChanged(QString &circuit, double value)
+void IntegrationPluginUniPi::onNeuronExtensionAnalogOutputStatusChanged(const QString &circuit, double value)
 {
     NeuronExtension *neuronExtension = static_cast<NeuronExtension *>(sender());
 
@@ -845,7 +845,7 @@ void IntegrationPluginUniPi::onNeuronExtensionAnalogOutputStatusChanged(QString 
     }
 }
 
-void IntegrationPluginUniPi::onNeuronUserLEDStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronUserLEDStatusChanged(const QString &circuit, bool value)
 {
     Neuron *neuron = static_cast<Neuron *>(sender());
 
@@ -871,7 +871,7 @@ void IntegrationPluginUniPi::onNeuronExtensionConnectionStateChanged(bool state)
     thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), state);
 }
 
-void IntegrationPluginUniPi::onRequestExecuted(QUuid requestId, bool success)
+void IntegrationPluginUniPi::onRequestExecuted(const QUuid &requestId, bool success)
 {
     if (m_asyncActions.contains(requestId)){
         ThingActionInfo *info = m_asyncActions.take(requestId);
@@ -883,7 +883,7 @@ void IntegrationPluginUniPi::onRequestExecuted(QUuid requestId, bool success)
     }
 }
 
-void IntegrationPluginUniPi::onRequestError(QUuid requestId, const QString &error)
+void IntegrationPluginUniPi::onRequestError(const QUuid &requestId, const QString &error)
 {
     if (m_asyncActions.contains(requestId)){
         ThingActionInfo *info = m_asyncActions.take(requestId);
@@ -891,7 +891,7 @@ void IntegrationPluginUniPi::onRequestError(QUuid requestId, const QString &erro
     }
 }
 
-void IntegrationPluginUniPi::onNeuronExtensionUserLEDStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronExtensionUserLEDStatusChanged(const QString &circuit, bool value)
 {
     NeuronExtension *neuronExtension = static_cast<NeuronExtension *>(sender());
 

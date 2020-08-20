@@ -78,22 +78,22 @@ private:
 private slots:
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
 
-    void onRequestExecuted(QUuid requestId, bool success);
-    void onRequestError(QUuid requestId, const QString &error);
+    void onRequestExecuted(const QUuid &requestId, bool success);
+    void onRequestError(const QUuid &requestId, const QString &error);
 
     void onNeuronConnectionStateChanged(bool state);
-    void onNeuronDigitalInputStatusChanged(QString &circuit, bool value);
-    void onNeuronDigitalOutputStatusChanged(QString &circuit, bool value);
-    void onNeuronAnalogInputStatusChanged(QString &circuit, double value);
-    void onNeuronAnalogOutputStatusChanged(QString &circuit,double value);
-    void onNeuronUserLEDStatusChanged(QString &circuit, bool value);
+    void onNeuronDigitalInputStatusChanged(const QString &circuit, bool value);
+    void onNeuronDigitalOutputStatusChanged(const QString &circuit, bool value);
+    void onNeuronAnalogInputStatusChanged(const QString &circuit, double value);
+    void onNeuronAnalogOutputStatusChanged(const QString &circuit,double value);
+    void onNeuronUserLEDStatusChanged(const QString &circuit, bool value);
 
     void onNeuronExtensionConnectionStateChanged(bool state);
-    void onNeuronExtensionDigitalInputStatusChanged(QString &circuit, bool value);
-    void onNeuronExtensionDigitalOutputStatusChanged(QString &circuit, bool value);
-    void onNeuronExtensionAnalogInputStatusChanged(QString &circuit, double value);
-    void onNeuronExtensionAnalogOutputStatusChanged(QString &circuit,double value);
-    void onNeuronExtensionUserLEDStatusChanged(QString &circuit, bool value);
+    void onNeuronExtensionDigitalInputStatusChanged(const QString &circuit, bool value);
+    void onNeuronExtensionDigitalOutputStatusChanged(const QString &circuit, bool value);
+    void onNeuronExtensionAnalogInputStatusChanged(const QString &circuit, double value);
+    void onNeuronExtensionAnalogOutputStatusChanged(const QString &circuit,double value);
+    void onNeuronExtensionUserLEDStatusChanged(const QString &circuit, bool value);
 
     void onReconnectTimer();
 

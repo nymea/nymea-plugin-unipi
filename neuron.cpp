@@ -384,7 +384,7 @@ bool Neuron::modbusWriteRequest(QUuid requestId, QModbusDataUnit request)
                 reply->deleteLater();
 
                 if (!m_writeRequestQueue.isEmpty()) {
-                    QPair<QUuid, QModbusDataUnit> request = m_writeRequestQueue.takeFirst();
+                    QPair<QUuid, QModbusDataUnit> request;// = m_writeRequestQueue.takeFirst();
                     modbusWriteRequest(request.first, request.second);
                 }
 
