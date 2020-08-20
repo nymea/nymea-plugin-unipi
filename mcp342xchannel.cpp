@@ -64,14 +64,14 @@ QByteArray MCP342XChannel::readData(int fd)
     }
 
     // Wait for device to accept configuration (conversation bit is cleared)
-    char readBuf[2] = {0};
+    char readBuf[3] = {0};
     do {
-        if (read(fd, readBuf, 2) != 2) {
+        if (read(fd, readBuf, 3) != 3) {
             qCWarning(dcUniPi()) << "MCP342X: could not read ADC data";
             return QByteArray();
         }
-    } while (!(readBuf[0] & (1 << ConfRegisterBits::RDY)));
+    } while (!(readBuf[2] & (1 << ConfRegisterBits::RDY)));
 
-    return QByteArray(readBuf, 2);
+    return QByteArray(readBuf, 3);
 }
 

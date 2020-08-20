@@ -55,6 +55,7 @@ public:
     };
 
     explicit UniPi(I2CManager *i2cManager, UniPiType unipiType, QObject *parent = nullptr);
+    ~UniPi() override;
 
     bool init();
     QString type();

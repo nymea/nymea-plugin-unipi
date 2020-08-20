@@ -43,6 +43,24 @@ UniPi::UniPi(I2CManager *i2cManager, UniPiType unipiType, QObject *parent) :
     m_analogChannel2 = new MCP342XChannel("i2c-1", 0x68, 1, MCP342XChannel::Gain_1, this);
 }
 
+UniPi::~UniPi()
+{
+    m_mcp23008->deleteLater();
+
+    m_i2cManager->close(m_analogChannel1);
+    m_analogChannel1->deleteLater();
+    m_i2cManager->close(m_analogChannel2);
+    m_analogChannel2->deleteLater();
+
+    Q_FOREACH (GpioMonitor *gpio, m_monitorGpios.keys()) {
+        gpio->disable();
+        gpio->deleteLater();
+    }
+
+    m_analogOutput->disable();
+    m_analogOutput->deleteLater();
+}
+
 bool UniPi::init()
 {
     //init MCP23008 Outputs
