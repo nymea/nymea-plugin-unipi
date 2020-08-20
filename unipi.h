@@ -35,10 +35,10 @@
 #include "gpiodescriptor.h"
 #include "mcp23008.h"
 #include "mcp342xchannel.h"
+#include "unipipwm.h"
 
 #include "hardware/gpio.h"
 #include "hardware/gpiomonitor.h"
-#include "hardware/pwm.h"
 #include "hardware/i2c/i2cmanager.h"
 
 class I2CDevice;
@@ -83,7 +83,7 @@ private:
 
     int getPinFromCircuit(const QString &cicuit);
     QHash<GpioMonitor *, QString> m_monitorGpios;
-    Pwm *m_analogOutput = nullptr;
+    UniPiPwm *m_analogOutput = nullptr;
 
 signals:
     void digitalOutputStatusChanged(const QString &circuit, const bool &value);

@@ -49,9 +49,9 @@ UniPi::~UniPi()
 {
     m_mcp23008->deleteLater();
 
-    m_i2cManager->close(m_analogInputChannel1);
+    //m_i2cManager->close(m_analogInputChannel1);
     m_analogInputChannel1->deleteLater();
-    m_i2cManager->close(m_analogInputChannel2);
+    //m_i2cManager->close(m_analogInputChannel2);
     m_analogInputChannel2->deleteLater();
 
     Q_FOREACH (GpioMonitor *gpio, m_monitorGpios.keys()) {
@@ -108,7 +108,7 @@ bool UniPi::init()
         qCWarning(dcUniPi()) << "Error could not enable analog output";
         return false;
     }
-    m_analogOutput->setPolarity(Pwm::PolarityNormal);
+    m_analogOutput->setPolarity(UniPiPwm::PolarityNormal);
     m_analogOutput->setFrequency(400);
     m_analogOutput->setPercentage(0);
 
