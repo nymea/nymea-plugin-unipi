@@ -1,44 +1,46 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                         *
- *  Copyright (C) 2019 Bernhard Trinnes <bernhard.trinnes@nymea.io>        *
- *                                                                         *
- *  This file is part of nymea.                                            *
- *                                                                         *
- *  This library is free software; you can redistribute it and/or          *
- *  modify it under the terms of the GNU Lesser General Public             *
- *  License as published by the Free Software Foundation; either           *
- *  version 2.1 of the License, or (at your option) any later version.     *
- *                                                                         *
- *  This library is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
- *  Lesser General Public License for more details.                        *
- *                                                                         *
- *  You should have received a copy of the GNU Lesser General Public       *
- *  License along with this library; If not, see                           *
- *  <http://www.gnu.org/licenses/>.                                        *
- *                                                                         *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*
+* Copyright 2013 - 2020, nymea GmbH
+* Contact: contact@nymea.io
+*
+* This file is part of nymea.
+* This project including source code and documentation is protected by
+* copyright law, and remains the property of nymea GmbH. All rights, including
+* reproduction, publication, editing and translation, are reserved. The use of
+* this project is subject to the terms of a license agreement to be concluded
+* with nymea GmbH in accordance with the terms of use of nymea GmbH, available
+* under https://nymea.io/license
+*
+* GNU Lesser General Public License Usage
+* Alternatively, this project may be redistributed and/or modified under the
+* terms of the GNU Lesser General Public License as published by the Free
+* Software Foundation; version 3. This project is distributed in the hope that
+* it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with this project. If not, see <https://www.gnu.org/licenses/>.
+*
+* For any further details and any questions please contact us under
+* contact@nymea.io or see our FAQ/Licensing Information on
+* https://nymea.io/license/faq
+*
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "unipi.h"
 #include "extern-plugininfo.h"
 #include <QProcess>
 #include <QTimer>
 
-UniPi::UniPi(UniPiType unipiType, QObject *parent) :
+UniPi::UniPi(I2CManager *i2cManager, UniPiType unipiType, QObject *parent) :
     QObject(parent),
+    m_i2cManager(i2cManager),
     m_unipiType(unipiType)
 {
     m_mcp23008 = new MCP23008("i2c-1", 0x20, this);
-    m_mcp3422 = new MCP3422("i2c-1", 0x68, this);
-}
-
-UniPi::~UniPi()
-{
-    m_mcp23008->deleteLater();
-
-    m_mcp3422->disable();
-    m_mcp3422->deleteLater();
+    m_analogChannel1 = new MCP342XChannel("i2c-1", 0x68, 0, MCP342XChannel::Gain_1, this);
+    m_analogChannel2 = new MCP342XChannel("i2c-1", 0x68, 1, MCP342XChannel::Gain_1, this);
 }
 
 bool UniPi::init()
@@ -50,11 +52,11 @@ bool UniPi::init()
         m_mcp23008->writeRegister(MCP23008::RegisterAddress::GPPU, 0x00);  //disable all pull up resistors
         m_mcp23008->writeRegister(MCP23008::RegisterAddress::OLAT, 0x00);  //Set all outputs to low
     } else {
-       qCWarning(dcUniPi()) << "Could not init MCP23008";
-       return false;
+        qCWarning(dcUniPi()) << "Could not init MCP23008";
+        return false;
     }
 
-     // In case of re-init
+    // In case of re-init
     if (!m_monitorGpios.isEmpty()) {
         foreach (GpioMonitor *gpio, m_monitorGpios.keys()) {
             m_monitorGpios.remove(gpio);
@@ -99,11 +101,39 @@ bool UniPi::init()
         m_pwms.insert(pwm, circuit);
     }
 
-    foreach (QString circuit, analogInputs()){
-        int pin = getPinFromCircuit(circuit);
-        Q_UNUSED(pin)
-        //TODO Init Raspberry Pi Analog Input
+    if (!m_i2cManager->open(m_analogChannel1)) {
+        qCDebug(dcUniPi()) << "Failed to open analog channel 1";
+        return false;
     }
+    connect(m_analogChannel1, &MCP342XChannel::readingAvailable, this, [this](const QByteArray &data){
+        if (data.length() != 2) {
+            qCWarning(dcUniPi()) << "Error reading from analog channel 1";
+            return;
+        }
+        int value = ((((data[0]&0x3F))<<16))+((data[1]<<8))+(((data[2]&0xE0)));
+        const int max = 8388608;
+        double transformedValue = 2.5 * value / max;
+        double voltage = transformedValue;
+        emit analogInputStatusChanged("AI01", voltage);
+    });
+    m_i2cManager->startReading(m_analogChannel1, 5000);
+
+    if (!m_i2cManager->open(m_analogChannel2)) {
+        qCDebug(dcUniPi()) << "Failed to open analog channel 2";
+        return false;
+    }
+    connect(m_analogChannel2, &MCP342XChannel::readingAvailable, this, [this](const QByteArray &data){
+        if (data.length() != 2) {
+            qCWarning(dcUniPi()) << "Error reading from analog channel 2";
+            return;
+        }
+        int value = ((((data[0]&0x3F))<<16))+((data[1]<<8))+(((data[2]&0xE0)));
+        const int max = 8388608;
+        double transformedValue = 2.5 * value / max;
+        double voltage = transformedValue;
+        emit analogInputStatusChanged("AI02", voltage);
+    });
+    m_i2cManager->startReading(m_analogChannel2, 5000);
     return true;
 }
 
@@ -377,25 +407,6 @@ bool UniPi::getAnalogOutput(const QString &circuit)
     emit analogOutputStatusChanged(circuit, voltage);
 
     return true;
-}
-
-bool UniPi::getAnalogInput(const QString &circuit)
-{
-    int pin = getPinFromCircuit(circuit);
-    if (pin == 0) {
-        qWarning(dcUniPi()) << "Out of range pin number";
-        return false;
-    }
-
-    double voltage;
-    if (pin == 1) {
-        voltage= m_mcp3422->getChannelValue(MCP3422::Channel1);
-    } else {
-        voltage= m_mcp3422->getChannelValue(MCP3422::Channel2);
-    }
-
-    emit analogInputStatusChanged(circuit, voltage);
-    return false;
 }
 
 void UniPi::onInputValueChanged(const bool &value)

@@ -1,25 +1,32 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                         *
- *  Copyright (C) 2019 Bernhard Trinnes <bernhard.trinnes@nymea.io>        *
- *  Copyright (C) 2018 Simon Stürz <simon.stuerz@nymea.io>                 *
- *                                                                         *
- *  This file is part of nymea.                                            *
- *                                                                         *
- *  This library is free software; you can redistribute it and/or          *
- *  modify it under the terms of the GNU Lesser General Public             *
- *  License as published by the Free Software Foundation; either           *
- *  version 2.1 of the License, or (at your option) any later version.     *
- *                                                                         *
- *  This library is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
- *  Lesser General Public License for more details.                        *
- *                                                                         *
- *  You should have received a copy of the GNU Lesser General Public       *
- *  License along with this library; If not, see                           *
- *  <http://www.gnu.org/licenses/>.                                        *
- *                                                                         *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*
+* Copyright 2013 - 2020, nymea GmbH
+* Contact: contact@nymea.io
+*
+* This file is part of nymea.
+* This project including source code and documentation is protected by
+* copyright law, and remains the property of nymea GmbH. All rights, including
+* reproduction, publication, editing and translation, are reserved. The use of
+* this project is subject to the terms of a license agreement to be concluded
+* with nymea GmbH in accordance with the terms of use of nymea GmbH, available
+* under https://nymea.io/license
+*
+* GNU Lesser General Public License Usage
+* Alternatively, this project may be redistributed and/or modified under the
+* terms of the GNU Lesser General Public License as published by the Free
+* Software Foundation; version 3. This project is distributed in the hope that
+* it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with this project. If not, see <https://www.gnu.org/licenses/>.
+*
+* For any further details and any questions please contact us under
+* contact@nymea.io or see our FAQ/Licensing Information on
+* https://nymea.io/license/faq
+*
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "integrationpluginunipi.h"
 #include "plugininfo.h"
@@ -236,7 +243,25 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == analogOutputThingClassId) {
-        //TODO add unipi 1 and unipi 1 lite
+        foreach(Thing *parent, myThings()) {
+            if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
+                foreach (QString circuit, m_unipi->analogOutputs()) {
+                    ThingDescriptor ThingDescriptor(analogOutputThingClassId, QString("Analog Output %1").arg(circuit), "UniPi", parent->id());
+                    foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
+                        if (thing->paramValue(analogOutputThingCircuitParamTypeId) == circuit) {
+                            qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parent->id();
+                            ThingDescriptor.setThingId(thing->id());
+                            break;
+                        }
+                    }
+                    ParamList params;
+                    params.append(Param(analogOutputThingCircuitParamTypeId, circuit));
+                    ThingDescriptor.setParams(params);
+                    info->addThingDescriptor(ThingDescriptor);
+                }
+                break;
+            }
+        }
 
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
             ThingId parentId = m_neuronExtensions.key(neuronExtension);
@@ -329,9 +354,9 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("There is already a UniPi gateway in the system.")); //only one parent Thing allowed
 
         if(thing->thingClassId() == uniPi1ThingClassId) {
-            m_unipi = new UniPi(UniPi::UniPiType::UniPi1, this);
+            m_unipi = new UniPi(hardwareManager()->i2cManager(), UniPi::UniPiType::UniPi1, this);
         } else if (thing->thingClassId() == uniPi1LiteThingClassId) {
-            m_unipi = new UniPi(UniPi::UniPiType::UniPi1Lite, this);
+            m_unipi = new UniPi(hardwareManager()->i2cManager(), UniPi::UniPiType::UniPi1Lite, this);
         }
 
         if (!m_unipi->init()) {
