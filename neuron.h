@@ -42,6 +42,11 @@ class Neuron : public QObject
     Q_OBJECT
 public:
 
+    struct Request {
+        QUuid id;
+        QModbusDataUnit data;
+    };
+
     enum NeuronTypes {
         S103,
         M103,
@@ -101,7 +106,7 @@ private:
     QHash<QString, int> m_modbusAnalogInputRegisters;
     QHash<QString, int> m_modbusAnalogOutputRegisters;
     QHash<QString, int> m_modbusUserLEDRegisters;
-    QList<QPair<QUuid, QModbusDataUnit>> m_writeRequestQueue;
+    QList<Request> m_writeRequestQueue;
     QList<QModbusDataUnit> m_readRequestQueue;
 
     NeuronTypes m_neuronType = NeuronTypes::S103;
@@ -109,21 +114,21 @@ private:
     QHash<int, uint16_t> m_previousModbusRegisterValue;
 
     bool loadModbusMap();
-    bool modbusReadRequest(QModbusDataUnit request);
-    bool modbusWriteRequest(QUuid requestId, QModbusDataUnit request);
+    bool modbusReadRequest(const QModbusDataUnit &request);
+    bool modbusWriteRequest(const Request &request);
 
     bool getInputRegisters(QList<int> registers);
     bool getHoldingRegisters(QList<int> registers);
     bool getCoils(QList<int> registers);
 
 signals:
-    void requestExecuted(QUuid requestId, bool success);
-    void requestError(QUuid requestId, const QString &error);
-    void digitalInputStatusChanged(QString &circuit, bool value);
-    void digitalOutputStatusChanged(QString &circuit, bool value);
-    void analogInputStatusChanged(QString &circuit, double value);
-    void analogOutputStatusChanged(QString &circuit, double value);
-    void userLEDStatusChanged(QString &circuit, bool value);
+    void requestExecuted(const QUuid &requestId, bool success);
+    void requestError(const QUuid &requestId, const QString &error);
+    void digitalInputStatusChanged(const QString &circuit, bool value);
+    void digitalOutputStatusChanged(const QString &circuit, bool value);
+    void analogInputStatusChanged(const QString &circuit, double value);
+    void analogOutputStatusChanged(const QString &circuit, double value);
+    void userLEDStatusChanged(const QString &circuit, bool value);
     void connectionStateChanged(bool state);
 
 public slots:
