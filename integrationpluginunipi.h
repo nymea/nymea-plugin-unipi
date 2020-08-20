@@ -103,7 +103,7 @@ private slots:
     void onUniPiDigitalInputStatusChanged(const QString &circuit, bool value);
     void onUniPiDigitalOutputStatusChanged(const QString &circuit, bool value);
     void onUniPiAnalogInputStatusChanged(const QString &circuit, double value);
-    void onUniPiAnalogOutputStatusChanged(const QString &circuit,double value);
+    void onUniPiAnalogOutputStatusChanged(double value);
 };
 
 #endif // INTEGRATIONPLUGINUNIPI_H
