@@ -41,6 +41,8 @@
 #include "hardware/pwm.h"
 #include "hardware/i2c/i2cmanager.h"
 
+class I2CDevice;
+
 class UniPi : public QObject
 {
     Q_OBJECT

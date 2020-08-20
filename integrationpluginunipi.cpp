@@ -30,6 +30,7 @@
 
 #include "integrationpluginunipi.h"
 #include "plugininfo.h"
+#include "hardware/i2c/i2cmanager.h"
 
 #include <QJsonDocument>
 #include <QTimer>

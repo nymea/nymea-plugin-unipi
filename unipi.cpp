@@ -105,15 +105,12 @@ bool UniPi::init()
         qCDebug(dcUniPi()) << "Failed to open analog channel 1";
         return false;
     }
-    connect(m_analogChannel1, &MCP342XChannel::readingAvailable, this, [this](const QByteArray &data){
+    connect(m_analogChannel1, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
         if (data.length() != 2) {
             qCWarning(dcUniPi()) << "Error reading from analog channel 1";
             return;
         }
-        int value = ((((data[0]&0x3F))<<16))+((data[1]<<8))+(((data[2]&0xE0)));
-        const int max = 8388608;
-        double transformedValue = 2.5 * value / max;
-        double voltage = transformedValue;
+        double voltage = data[0];
         emit analogInputStatusChanged("AI01", voltage);
     });
     m_i2cManager->startReading(m_analogChannel1, 5000);
@@ -122,15 +119,12 @@ bool UniPi::init()
         qCDebug(dcUniPi()) << "Failed to open analog channel 2";
         return false;
     }
-    connect(m_analogChannel2, &MCP342XChannel::readingAvailable, this, [this](const QByteArray &data){
+    connect(m_analogChannel2, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
         if (data.length() != 2) {
             qCWarning(dcUniPi()) << "Error reading from analog channel 2";
             return;
         }
-        int value = ((((data[0]&0x3F))<<16))+((data[1]<<8))+(((data[2]&0xE0)));
-        const int max = 8388608;
-        double transformedValue = 2.5 * value / max;
-        double voltage = transformedValue;
+        double voltage = data[0];
         emit analogInputStatusChanged("AI02", voltage);
     });
     m_i2cManager->startReading(m_analogChannel2, 5000);
