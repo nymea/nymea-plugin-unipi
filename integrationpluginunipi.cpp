@@ -74,7 +74,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
 
     if (ThingClassId == digitalInputThingClassId) {
         foreach(Thing *parent, myThings()) {
-            if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
+            if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
                 foreach (QString circuit, m_unipi->digitalInputs()) {
                     ThingDescriptor thingDescriptor(digitalInputThingClassId, QString("Digital input %1").arg(circuit), "UniPi 1", parent->id());
                     foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
@@ -131,7 +131,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == digitalOutputThingClassId) {
         foreach(Thing *parent, myThings()) {
-            if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
+            if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
                 foreach (QString circuit, m_unipi->digitalOutputs()) {
                     ThingDescriptor ThingDescriptor(digitalOutputThingClassId, QString("Digital output %1").arg(circuit), "UniPi 1", parent->id());
                     foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
@@ -188,7 +188,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == analogInputThingClassId) {
         foreach(Thing *parent, myThings()) {
-            if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
+            if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
                 foreach (QString circuit, m_unipi->analogInputs()) {
                     ThingDescriptor ThingDescriptor(analogInputThingClassId, QString("Analog input %1").arg(circuit), "UniPi", parent->id());
                     foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
@@ -245,7 +245,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == analogOutputThingClassId) {
         foreach(Thing *parent, myThings()) {
-            if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
+            if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
                 foreach (QString circuit, m_unipi->analogOutputs()) {
                     ThingDescriptor ThingDescriptor(analogOutputThingClassId, QString("Analog Output %1").arg(circuit), "UniPi", parent->id());
                     foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
