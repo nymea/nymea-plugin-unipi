@@ -28,38 +28,51 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef I2CPORT_H
-#define I2CPORT_H
+#ifndef MCP342X_H
+#define MCP342X_H
 
-#include <QObject>
+#include <QThread>
+#include <QMutex>
 
-class I2CPortPrivate;
+#include <hardware/i2c/i2cdevice.h>
 
-class I2CPort : public QObject
+class MCP342XChannel: public I2CDevice
 {
     Q_OBJECT
 public:
-    explicit I2CPort(const QString &portName, QObject *parent = nullptr);
 
-    static QStringList availablePorts();
+    enum Gain {
+        Gain_1 = 0,
+        Gain_2 = 1,
+        Gain_4 = 2,
+        Gain_8 = 3
+    };
 
-    QList<int> scanRegirsters();
+    enum ConfRegisterBits {
+        G0 = 0, // Gain Selection
+        G1, // Gain Selection
+        S0, // Sample Rate
+        S1, // Sample Rate
+        OC, // Conversion Mode Bit
+        C0, // Channel Selection
+        C1, // Channel Selection
+        RDY // Ready Bit
+    };
 
-    int deviceDescriptor() const;
-    int address() const;
-    QString portName() const;
-    QString portDeviceName() const;
+    enum SampleRateSelectionBit {
+        Bits12 = 0,
+        Bits14 = 1,
+        Bits16 = 2,
+        Bits18 = 3
+    };
 
-    bool isOpen() const;
-    bool isValid() const;
+    explicit MCP342XChannel(const QString &portName, int address, int channel, Gain gain, QObject *parent = nullptr);
 
-public slots:
-    bool openPort(int i2cAddress = 0);
-    void closePort();
+    QByteArray readData(int fd) override;
 
 private:
-    I2CPortPrivate *d_ptr = nullptr;
-
+    int m_channel = 0;
+    Gain m_gain = Gain_1;
 };
 
-#endif // I2CPORT_H
+#endif // MCP342X_H

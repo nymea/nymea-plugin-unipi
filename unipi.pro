@@ -36,7 +36,7 @@ SOURCES += \
     mcp23008.cpp \
     i2cport.cpp \
     unipi.cpp \
-    mcp3422.cpp
+    mcp342xchannel.cpp
 
 HEADERS += \
     integrationpluginunipi.h \
@@ -46,7 +46,7 @@ HEADERS += \
     i2cport.h \
     unipi.h \
     i2cport_p.h \
-    mcp3422.h
+    mcp342xchannel.h
 
 MAP_FILES.files = files(modbus_maps/*)
 MAP_FILES.path = [QT_INSTALL_PREFIX]/share/nymea/modbus/

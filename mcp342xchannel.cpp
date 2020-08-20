@@ -28,38 +28,50 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef I2CPORT_H
-#define I2CPORT_H
+#include "mcp342xchannel.h"
+#include "extern-plugininfo.h"
 
-#include <QObject>
+#include <unistd.h>
 
-class I2CPortPrivate;
+#define GENERAL_CALL_RESET      0x0006
+#define GENERAL_CALL_LATCH      0x0004
+#define GENERAL_CALL_CONVERSION 0x0008
 
-class I2CPort : public QObject
+#define CONFIGURATION_REGISTER
+
+
+MCP342XChannel::MCP342XChannel(const QString &portName, int address, int channel, Gain gain, QObject *parent) :
+    I2CDevice(portName, address, parent),
+    m_channel(channel),
+    m_gain(gain)
 {
-    Q_OBJECT
-public:
-    explicit I2CPort(const QString &portName, QObject *parent = nullptr);
 
-    static QStringList availablePorts();
+}
 
-    QList<int> scanRegirsters();
 
-    int deviceDescriptor() const;
-    int address() const;
-    QString portName() const;
-    QString portDeviceName() const;
+QByteArray MCP342XChannel::readData(int fd)
+{
+    // Start a configuration conversation
+    unsigned char writeBuf[1] = {0};
+    writeBuf[0] |= (m_channel & 0x0003) << ConfRegisterBits::C0;
+    writeBuf[0] |= m_gain << ConfRegisterBits::G0;
+    //writeBuf[0] |= SampleRateSelectionBit::Bits18 << ConfRegisterBits::S0;
+    writeBuf[0] |= 1 << ConfRegisterBits::OC;   // one shot
+    writeBuf[0] |= 1 << ConfRegisterBits::RDY;  // start conversoin
+    if (write(fd, writeBuf, 1) != 1) {
+        qCWarning(dcUniPi()) << "MCP342X: could not write config register";
+        return QByteArray();
+    }
 
-    bool isOpen() const;
-    bool isValid() const;
+    // Wait for device to accept configuration (conversation bit is cleared)
+    char readBuf[2] = {0};
+    do {
+        if (read(fd, readBuf, 2) != 2) {
+            qCWarning(dcUniPi()) << "MCP342X: could not read ADC data";
+            return QByteArray();
+        }
+    } while (!(readBuf[0] & (1 << ConfRegisterBits::RDY)));
 
-public slots:
-    bool openPort(int i2cAddress = 0);
-    void closePort();
+    return QByteArray(readBuf, 2);
+}
 
-private:
-    I2CPortPrivate *d_ptr = nullptr;
-
-};
-
-#endif // I2CPORT_H
