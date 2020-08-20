@@ -39,18 +39,20 @@ UniPi::UniPi(I2CManager *i2cManager, UniPiType unipiType, QObject *parent) :
     m_unipiType(unipiType)
 {
     m_mcp23008 = new MCP23008("i2c-1", 0x20, this);
-    m_analogChannel1 = new MCP342XChannel("i2c-1", 0x68, 0, MCP342XChannel::Gain_1, this);
-    m_analogChannel2 = new MCP342XChannel("i2c-1", 0x68, 1, MCP342XChannel::Gain_1, this);
+    m_analogInputChannel1 = new MCP342XChannel("i2c-1", 0x68, 0, MCP342XChannel::Gain_1, this);
+    m_analogInputChannel2 = new MCP342XChannel("i2c-1", 0x68, 1, MCP342XChannel::Gain_1, this);
+
+    m_analogOutput = new Pwm(0, this);
 }
 
 UniPi::~UniPi()
 {
     m_mcp23008->deleteLater();
 
-    m_i2cManager->close(m_analogChannel1);
-    m_analogChannel1->deleteLater();
-    m_i2cManager->close(m_analogChannel2);
-    m_analogChannel2->deleteLater();
+    m_i2cManager->close(m_analogInputChannel1);
+    m_analogInputChannel1->deleteLater();
+    m_i2cManager->close(m_analogInputChannel2);
+    m_analogInputChannel2->deleteLater();
 
     Q_FOREACH (GpioMonitor *gpio, m_monitorGpios.keys()) {
         gpio->disable();
@@ -102,10 +104,6 @@ bool UniPi::init()
     }
 
     //Init Raspberry Pi PWM output
-    if (m_analogOutput) {
-        delete m_analogOutput;
-    }
-    m_analogOutput = new Pwm(0, this);
     if (!m_analogOutput->enable()) {
         qCWarning(dcUniPi()) << "Error could not enable analog output";
         return false;
@@ -114,11 +112,11 @@ bool UniPi::init()
     m_analogOutput->setFrequency(400);
     m_analogOutput->setPercentage(0);
 
-    if (!m_i2cManager->open(m_analogChannel1)) {
+    if (!m_i2cManager->open(m_analogInputChannel1)) {
         qCDebug(dcUniPi()) << "Failed to open analog channel 1";
         return false;
     }
-    connect(m_analogChannel1, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
+    connect(m_analogInputChannel1, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
         if (data.length() != 2) {
             qCWarning(dcUniPi()) << "Error reading from analog channel 1";
             return;
@@ -127,13 +125,13 @@ bool UniPi::init()
         double voltage = data[0];
         emit analogInputStatusChanged("AI01", voltage);
     });
-    m_i2cManager->startReading(m_analogChannel1, 5000);
+    m_i2cManager->startReading(m_analogInputChannel1, 5000);
 
-    if (!m_i2cManager->open(m_analogChannel2)) {
+    if (!m_i2cManager->open(m_analogInputChannel2)) {
         qCDebug(dcUniPi()) << "Failed to open analog channel 2";
         return false;
     }
-    connect(m_analogChannel2, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
+    connect(m_analogInputChannel2, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
         if (data.length() != 2) {
             qCWarning(dcUniPi()) << "Error reading from analog channel 2";
             return;
@@ -142,7 +140,7 @@ bool UniPi::init()
         double voltage = data[0];
         emit analogInputStatusChanged("AI02", voltage);
     });
-    m_i2cManager->startReading(m_analogChannel2, 5000);
+    m_i2cManager->startReading(m_analogInputChannel2, 5000);
     return true;
 }
 

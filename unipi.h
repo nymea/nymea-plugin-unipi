@@ -78,8 +78,8 @@ private:
     UniPiType m_unipiType = UniPiType::UniPi1;
     MCP23008 *m_mcp23008 = nullptr;
 
-    MCP342XChannel *m_analogChannel1 = nullptr;
-    MCP342XChannel *m_analogChannel2 = nullptr;
+    MCP342XChannel *m_analogInputChannel1 = nullptr;
+    MCP342XChannel *m_analogInputChannel2 = nullptr;
 
     int getPinFromCircuit(const QString &cicuit);
     QHash<GpioMonitor *, QString> m_monitorGpios;
