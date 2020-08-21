@@ -147,7 +147,7 @@ bool UniPi::init()
         emit analogInputStatusChanged("AI2", voltage);
     });
     //TODO improve, this is required because otherwise a conversion will be started even the first one wasn't finished
-    QTimer::singleShot(100, this, [this] {m_i2cManager->startReading(m_analogInputChannel2, 5000);});
+    m_i2cManager->startReading(m_analogInputChannel2, 5000);
     return true;
 }
 
