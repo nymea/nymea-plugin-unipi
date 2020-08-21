@@ -121,6 +121,11 @@ bool UniPi::init()
         return false;
     }
     connect(m_analogInputChannel1, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
+
+        if (data.length() < 3) {
+            qCWarning(dcUniPi()) << "Error reading data from analog channel 1" << data;
+            return;
+        }
         qCDebug(dcUniPi()) << "Received data from analog channel 1" << data;
         qint16 rawValue = (static_cast<quint16>(data[0]) << 8) | data[1];
         double voltage = (rawValue * 0.001 * 5.51)/2.00;
@@ -133,6 +138,11 @@ bool UniPi::init()
         return false;
     }
     connect(m_analogInputChannel2, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
+
+        if (data.length() < 3) {
+            qCWarning(dcUniPi()) << "Error reading data from analog channel 2" << data;
+            return;
+        }
         qCDebug(dcUniPi()) << "Received data from analog channel 2" << data;
         qint16 rawValue = (static_cast<quint16>(data[0]) << 8) | data[1];
         double voltage = (rawValue * 0.001 * 5.51)/2.00;
@@ -213,18 +223,7 @@ QList<QString> UniPi::analogInputs()
 QList<QString> UniPi::analogOutputs()
 {
     QList<QString> outputs;
-    switch (m_unipiType) {
-    case UniPiType::UniPi1:
-        for (int i = 0; i < 1; ++i) {
-            outputs.append(QString("AO%1").arg(i));
-        }
-        break;
-    case UniPiType::UniPi1Lite:
-        for (int i = 0; i < 1; ++i) {
-            outputs.append(QString("AO%1").arg(i));
-        }
-        break;
-    }
+    outputs.append("AO");
     return outputs;
 }
 
@@ -331,6 +330,9 @@ int UniPi::getPinFromCircuit(const QString &circuit)
 
 bool UniPi::setDigitalOutput(const QString &circuit, bool status)
 {
+    if (!m_mcp23008) {
+        qCWarning(dcUniPi()) << "Could not set digital output, MCP23008 not initialized";
+    }
     int pin = getPinFromCircuit(circuit);
     if (pin == 0) {
         qWarning(dcUniPi()) << "Out of range pin number";
@@ -355,6 +357,10 @@ bool UniPi::setDigitalOutput(const QString &circuit, bool status)
 
 bool UniPi::getDigitalOutput(const QString &circuit)
 {
+    if (!m_mcp23008) {
+        qCWarning(dcUniPi()) << "Could not get digital output, MCP23008 not initialized";
+    }
+
     int pin = getPinFromCircuit(circuit);
     if (pin > 7)
         return false;
@@ -371,11 +377,13 @@ bool UniPi::getDigitalInput(const QString &circuit)
 {
     int pin = getPinFromCircuit(circuit);
     if (pin == 0) {
-        qWarning(dcUniPi()) << "Out of range pin number";
+        qCWarning(dcUniPi()) << "Out of range pin number";
         return false;
     }
-    if (!m_monitorGpios.values().contains(circuit))
+    if (!m_monitorGpios.values().contains(circuit)) {
+        qCWarning(dcUniPi()) << "Could not read digital inpu, GPIO not initialized" << circuit;
         return false;
+    }
     //Read RPi pins
     GpioMonitor *gpio = m_monitorGpios.key(circuit);
     digitalInputStatusChanged(circuit, gpio->value());
@@ -384,6 +392,10 @@ bool UniPi::getDigitalInput(const QString &circuit)
 
 bool UniPi::setAnalogOutput(double value)
 {
+    if (!m_analogOutput) {
+        qCWarning(dcUniPi()) << "Could not set analog output, PWM not initialized";
+    }
+
     int percentage = value * 10;     //convert volt to percentage
     if(!m_analogOutput->setPercentage(percentage))
         return false;
@@ -394,6 +406,10 @@ bool UniPi::setAnalogOutput(double value)
 
 bool UniPi::getAnalogOutput()
 {
+    if (!m_analogOutput) {
+        qCWarning(dcUniPi()) << "Could not get analog output, PWM not initialized";
+    }
+
     double voltage = m_analogOutput->percentage()/10.0;
     emit analogOutputStatusChanged(voltage);
 
