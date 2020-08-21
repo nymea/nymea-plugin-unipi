@@ -50,6 +50,15 @@ MCP342XChannel::MCP342XChannel(const QString &portName, int address, int channel
 
 QByteArray MCP342XChannel::readData(int fd)
 {
+    // Wair for previous messurements to be completed
+    char readBuf[3] = {0};
+    do {
+        if (read(fd, readBuf, 3) != 3) {
+            qCWarning(dcUniPi()) << "MCP342X: could not read ADC data";
+            return QByteArray();
+        }
+    } while (!(readBuf[2] & (1 << ConfRegisterBits::RDY)));
+
     // Start a configuration conversation
     unsigned char writeBuf[1] = {0};
     writeBuf[0] |= (m_channel & 0x0003) << ConfRegisterBits::C0;
@@ -62,8 +71,7 @@ QByteArray MCP342XChannel::readData(int fd)
         return QByteArray();
     }
 
-    // Wait for device to accept configuration (conversation bit is cleared)
-    char readBuf[3] = {0};
+    // Wait again for the device to finish measurement
     do {
         if (read(fd, readBuf, 3) != 3) {
             qCWarning(dcUniPi()) << "MCP342X: could not read ADC data";
