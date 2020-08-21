@@ -57,12 +57,12 @@ bool UniPiPwm::exportPwm()
 {
     QFile exportFile(m_pwmDirectory.path() + "/export");
     if (!exportFile.open(QIODevice::WriteOnly)) {
-        qCWarning(dcUniPi()) << "ERROR: could not export UniPiPwm" << m_chipNumber;
+        qCWarning(dcUniPi()) << "ERROR: could not export pwm1 on chip" << m_chipNumber;
         return false;
     }
 
     QTextStream out(&exportFile);
-    out << 0;
+    out << 1;
     exportFile.close();
     return true;
 }
@@ -72,7 +72,7 @@ bool UniPiPwm::enable()
 {
     QFile enableFile(m_pwmDirectory.path() + "/pwm1/enable");
     if (!enableFile.open(QIODevice::WriteOnly)) {
-        qCWarning(dcUniPi()) << "ERROR: could not enable pwm" << m_chipNumber;
+        qCWarning(dcUniPi()) << "ERROR: could not enable pwm1 on chip" << m_chipNumber;
         return false;
     }
 
@@ -87,7 +87,7 @@ bool UniPiPwm::disable()
 {
     QFile enableFile(m_pwmDirectory.path() + "/pwm1/enable");
     if (!enableFile.open(QIODevice::WriteOnly)) {
-        qCWarning(dcUniPi()) << "ERROR: could not disable UniPiPwm" << m_chipNumber;
+        qCWarning(dcUniPi()) << "ERROR: could not disable pwm1 on chip" << m_chipNumber;
         return false;
     }
 
@@ -160,7 +160,7 @@ double UniPiPwm::frequency()
     return (100000000.0 / (period() * 1000));
 }
 
-/*! Returns true, if the frequency [kHz] of this UniPiPwm has been set successfully to the given \a kHz. */
+/*! Returns true, if the frequency [kHz] of this Pwm has been set successfully to the given \a kHz. */
 bool UniPiPwm::setFrequency(double kHz)
 {
     // p = 1 / f
@@ -235,7 +235,7 @@ bool UniPiPwm::setPolarity(UniPiPwm::Polarity polarity)
     if (polarity == UniPiPwm::PolarityInvalid)
         return false;
 
-    // Note: the polarity can only be changed if the UniPiPwm is disabled.
+    // Note: the polarity can only be changed if the pwm is disabled.
     bool wasEnabled = isEnabled();
     if (wasEnabled && !disable())
         return false;
