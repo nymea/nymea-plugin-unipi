@@ -973,7 +973,7 @@ void IntegrationPluginUniPi::onUniPiDigitalOutputStatusChanged(const QString &ci
 
 void IntegrationPluginUniPi::onUniPiAnalogInputStatusChanged(const QString &circuit, double value)
 {
-    qDebug(dcUniPi) << "Digital Input changed" << circuit << value;
+    qDebug(dcUniPi) << "Analog Input changed" << circuit << value;
     Q_FOREACH (Thing *thing, myThings().filterByThingClassId(analogInputThingClassId)) {
         if (thing->paramValue(analogInputThingCircuitParamTypeId).toString() == circuit) {
             thing->setStateValue(analogInputInputValueStateTypeId, value);
