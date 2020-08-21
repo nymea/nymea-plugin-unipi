@@ -122,8 +122,9 @@ bool UniPi::init()
     }
     connect(m_analogInputChannel1, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
         qCDebug(dcUniPi()) << "Received data from analog channel 1" << data;
-        double voltage = ((static_cast<quint16>(data[0]) << 8) & data[1]) * 0.001 * 5.51;
-        emit analogInputStatusChanged("AI01", voltage);
+        qint16 rawValue = (static_cast<quint16>(data[0]) << 8) | data[1];
+        double voltage = (rawValue * 0.001 * 5.51)/2.00;
+        emit analogInputStatusChanged("AI1", voltage);
     });
     m_i2cManager->startReading(m_analogInputChannel1, 5000);
 
@@ -133,8 +134,9 @@ bool UniPi::init()
     }
     connect(m_analogInputChannel2, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
         qCDebug(dcUniPi()) << "Received data from analog channel 2" << data;
-        double voltage = ((static_cast<quint16>(data[0]) << 8) & data[1]) * 0.001 * 5.51;
-        emit analogInputStatusChanged("AI02", voltage);
+        qint16 rawValue = (static_cast<quint16>(data[0]) << 8) | data[1];
+        double voltage = (rawValue * 0.001 * 5.51)/2.00;
+        emit analogInputStatusChanged("AI2", voltage);
     });
     m_i2cManager->startReading(m_analogInputChannel2, 5000);
     return true;
