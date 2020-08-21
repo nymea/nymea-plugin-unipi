@@ -102,8 +102,12 @@ bool UniPi::init()
             });
         }
     }
-
     //Init Raspberry Pi PWM output
+    if (!m_analogOutput->exportPwm()) {
+        qCWarning(dcUniPi()) << "Error could not export analog output";
+        return false;
+    }
+
     if (!m_analogOutput->enable()) {
         qCWarning(dcUniPi()) << "Error could not enable analog output";
         return false;
