@@ -71,6 +71,9 @@ QByteArray MCP342XChannel::readData(int fd)
         }
     } while (!(readBuf[2] & (1 << ConfRegisterBits::RDY)));
 
+    if ((readBuf[2] & (0x03 << ConfRegisterBits::C0)) != ((m_channel & 0x0003) << ConfRegisterBits::C0))
+        return QByteArray();
+
     return QByteArray(readBuf, 3);
 }
 
