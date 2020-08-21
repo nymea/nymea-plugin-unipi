@@ -95,7 +95,7 @@ bool UniPi::init()
             return false;
         } else {
             QProcess::execute(QString("gpio -g mode %1 up").arg(pin));
-            QTimer::singleShot(1000, [gpioMonitor, circuit, this]() {
+            QTimer::singleShot(1000, this, [gpioMonitor, circuit, this]() {
                 emit digitalInputStatusChanged(circuit, gpioMonitor->value()); //set initial status
                 connect(gpioMonitor, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
                 m_monitorGpios.insert(gpioMonitor, circuit);
@@ -329,9 +329,6 @@ int UniPi::getPinFromCircuit(const QString &circuit)
 
 bool UniPi::setDigitalOutput(const QString &circuit, bool status)
 {
-    if (!m_mcp23008) {
-        qCWarning(dcUniPi()) << "Could not set digital output, MCP23008 not initialized";
-    }
     int pin = getPinFromCircuit(circuit);
     if (pin == 0) {
         qWarning(dcUniPi()) << "Out of range pin number";
@@ -356,10 +353,6 @@ bool UniPi::setDigitalOutput(const QString &circuit, bool status)
 
 bool UniPi::getDigitalOutput(const QString &circuit)
 {
-    if (!m_mcp23008) {
-        qCWarning(dcUniPi()) << "Could not get digital output, MCP23008 not initialized";
-    }
-
     int pin = getPinFromCircuit(circuit);
     if (pin > 7)
         return false;
@@ -391,10 +384,6 @@ bool UniPi::getDigitalInput(const QString &circuit)
 
 bool UniPi::setAnalogOutput(double value)
 {
-    if (!m_analogOutput) {
-        qCWarning(dcUniPi()) << "Could not set analog output, PWM not initialized";
-    }
-
     int percentage = value * 10;     //convert volt to percentage
     if(!m_analogOutput->setPercentage(percentage))
         return false;
@@ -405,10 +394,6 @@ bool UniPi::setAnalogOutput(double value)
 
 bool UniPi::getAnalogOutput()
 {
-    if (!m_analogOutput) {
-        qCWarning(dcUniPi()) << "Could not get analog output, PWM not initialized";
-    }
-
     double voltage = m_analogOutput->percentage()/10.0;
     emit analogOutputStatusChanged(voltage);
 
