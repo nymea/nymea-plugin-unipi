@@ -126,7 +126,6 @@ bool UniPi::init()
             qCWarning(dcUniPi()) << "Error reading data from analog channel 1" << data;
             return;
         }
-        qCDebug(dcUniPi()) << "Received data from analog channel 1" << data;
         qint16 rawValue = (static_cast<quint16>(data[0]) << 8) | data[1];
         double voltage = (rawValue * 0.001 * 5.51)/2.00;
         emit analogInputStatusChanged("AI1", voltage);
@@ -143,12 +142,12 @@ bool UniPi::init()
             qCWarning(dcUniPi()) << "Error reading data from analog channel 2" << data;
             return;
         }
-        qCDebug(dcUniPi()) << "Received data from analog channel 2" << data;
         qint16 rawValue = (static_cast<quint16>(data[0]) << 8) | data[1];
         double voltage = (rawValue * 0.001 * 5.51)/2.00;
         emit analogInputStatusChanged("AI2", voltage);
     });
-    m_i2cManager->startReading(m_analogInputChannel2, 5000);
+    //TODO improve, this is required because otherwise a conversion will be started even the first one wasn't finished
+    QTimer::singleShot(100, this, [this] {m_i2cManager->startReading(m_analogInputChannel2, 5000);});
     return true;
 }
 
