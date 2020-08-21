@@ -146,7 +146,6 @@ bool UniPi::init()
         double voltage = (rawValue * 0.001 * 5.51)/2.00;
         emit analogInputStatusChanged("AI2", voltage);
     });
-    //TODO improve, this is required because otherwise a conversion will be started even the first one wasn't finished
     m_i2cManager->startReading(m_analogInputChannel2, 5000);
     return true;
 }
@@ -206,12 +205,12 @@ QList<QString> UniPi::analogInputs()
     QList<QString> inputs;
     switch (m_unipiType) {
     case UniPiType::UniPi1:
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 1; i < 3; ++i) {
             inputs.append(QString("AI%1").arg(i));
         }
         break;
     case UniPiType::UniPi1Lite:
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 1; i < 3; ++i) {
             inputs.append(QString("AI%1").arg(i));
         }
         break;
