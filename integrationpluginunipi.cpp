@@ -951,13 +951,11 @@ void IntegrationPluginUniPi::onModbusRTUStateChanged(QModbusDevice::State state)
 void IntegrationPluginUniPi::onUniPiDigitalInputStatusChanged(const QString &circuit, bool value)
 {
     qDebug(dcUniPi) << "Digital Input changed" << circuit << value;
-    foreach(Thing *thing, myThings()) {
-        if (thing->thingClassId() == digitalInputThingClassId) {
-            if (thing->paramValue(digitalInputThingCircuitParamTypeId).toString() == circuit) {
+    Q_FOREACH (Thing *thing, myThings().filterByThingClassId(digitalInputThingClassId)) {
+        if (thing->paramValue(digitalInputThingCircuitParamTypeId).toString() == circuit) {
 
-                thing->setStateValue(digitalInputInputStatusStateTypeId, value);
-                return;
-            }
+            thing->setStateValue(digitalInputInputStatusStateTypeId, value);
+            return;
         }
     }
 }
@@ -965,13 +963,10 @@ void IntegrationPluginUniPi::onUniPiDigitalInputStatusChanged(const QString &cir
 void IntegrationPluginUniPi::onUniPiDigitalOutputStatusChanged(const QString &circuit, bool value)
 {
     qDebug(dcUniPi) << "Digital Output changed" << circuit << value;
-    foreach(Thing *thing, myThings()) {
-        if (thing->thingClassId() == digitalOutputThingClassId) {
-            if (thing->paramValue(digitalOutputThingCircuitParamTypeId).toString() == circuit) {
-
-                thing->setStateValue(digitalOutputPowerStateTypeId, value);
-                return;
-            }
+    Q_FOREACH (Thing *thing, myThings().filterByThingClassId(digitalOutputThingClassId)) {
+        if (thing->paramValue(digitalOutputThingCircuitParamTypeId).toString() == circuit) {
+            thing->setStateValue(digitalOutputPowerStateTypeId, value);
+            return;
         }
     }
 }
@@ -979,28 +974,20 @@ void IntegrationPluginUniPi::onUniPiDigitalOutputStatusChanged(const QString &ci
 void IntegrationPluginUniPi::onUniPiAnalogInputStatusChanged(const QString &circuit, double value)
 {
     qDebug(dcUniPi) << "Digital Input changed" << circuit << value;
-    foreach(Thing *thing, myThings()) {
-        if (thing->thingClassId() == analogInputThingClassId) {
-            if (thing->paramValue(analogInputThingCircuitParamTypeId).toString() == circuit) {
-                thing->setStateValue(analogInputInputValueStateTypeId, value);
-                return;
-            }
+    Q_FOREACH (Thing *thing, myThings().filterByThingClassId(analogInputThingClassId)) {
+        if (thing->paramValue(analogInputThingCircuitParamTypeId).toString() == circuit) {
+            thing->setStateValue(analogInputInputValueStateTypeId, value);
+            return;
         }
     }
 }
 
 void IntegrationPluginUniPi::onUniPiAnalogOutputStatusChanged(double value)
 {
-    foreach(Thing *parent, myThings()) {
-        if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
-            foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
-                if (thing->thingClassId() == analogOutputThingClassId) {
-                    thing->setStateValue(analogOutputOutputValueStateTypeId, value);
-                    return;
-                }
-            }
-            break;
-        }
+    qDebug(dcUniPi) << "Analog output changed" << value;
+    Q_FOREACH (Thing *thing, myThings().filterByThingClassId(analogOutputThingClassId)) {
+        thing->setStateValue(analogOutputOutputValueStateTypeId, value);
+        return;
     }
 }
 
