@@ -1,3 +1,11 @@
+nymea-plugin-unipi2 (0.1.9) xenial; urgency=medium
+
+  [ Bernhard Trinnes ]
+  * Add Analog IOs
+  * Update Readme
+
+ -- Jenkins <jenkins@nymea.io>  Mon, 31 Aug 2020 12:48:45 +0200
+
 nymea-plugin-unipi2 (0.1.8) xenial; urgency=medium
 
   [ Bernhard Trinnes ]
