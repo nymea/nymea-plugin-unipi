@@ -1,3 +1,10 @@
+nymea-plugin-unipi2 (0.1.10) xenial; urgency=medium
+
+  [ Bernhard Trinnes ]
+  * UniPi add missing digital and analog IOs
+
+ -- Jenkins <jenkins@nymea.io>  Wed, 30 Sep 2020 17:31:46 +0200
+
 nymea-plugin-unipi2 (0.1.9) xenial; urgency=medium
 
   [ Bernhard Trinnes ]
