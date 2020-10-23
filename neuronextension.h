@@ -1,3 +1,33 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*
+* Copyright 2013 - 2020, nymea GmbH
+* Contact: contact@nymea.io
+*
+* This file is part of nymea.
+* This project including source code and documentation is protected by
+* copyright law, and remains the property of nymea GmbH. All rights, including
+* reproduction, publication, editing and translation, are reserved. The use of
+* this project is subject to the terms of a license agreement to be concluded
+* with nymea GmbH in accordance with the terms of use of nymea GmbH, available
+* under https://nymea.io/license
+*
+* GNU Lesser General Public License Usage
+* Alternatively, this project may be redistributed and/or modified under the
+* terms of the GNU Lesser General Public License as published by the Free
+* Software Foundation; version 3. This project is distributed in the hope that
+* it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with this project. If not, see <https://www.gnu.org/licenses/>.
+*
+* For any further details and any questions please contact us under
+* contact@nymea.io or see our FAQ/Licensing Information on
+* https://nymea.io/license/faq
+*
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #ifndef NEURONEXTENSION_H
 #define NEURONEXTENSION_H
 
@@ -11,6 +41,11 @@ class NeuronExtension : public QObject
 {
     Q_OBJECT
 public:
+
+    struct Request {
+        QUuid id;
+        QModbusDataUnit data;
+    };
 
     enum ExtensionTypes {
         xS10,
@@ -62,7 +97,7 @@ private:
     QHash<QString, int> m_modbusAnalogInputRegisters;
     QHash<QString, int> m_modbusAnalogOutputRegisters;
     QHash<QString, int> m_modbusUserLEDRegisters;
-    QList<QPair<QUuid, QModbusDataUnit>> m_writeRequestQueue;
+    QList<Request> m_writeRequestQueue;
     QList<QModbusDataUnit> m_readRequestQueue;
 
     QModbusRtuSerialMaster *m_modbusInterface = nullptr;
@@ -71,19 +106,19 @@ private:
     QHash<int, uint16_t> m_previousModbusRegisterValue;
 
     bool loadModbusMap();
-    bool modbusWriteRequest(QUuid requestId, QModbusDataUnit request);    
-    bool modbusReadRequest(QModbusDataUnit request);
+    bool modbusWriteRequest(const Request &request);
+    bool modbusReadRequest(const QModbusDataUnit &request);
 
 signals:
-    void requestExecuted(QUuid requestId, bool success);
-    void requestError(QUuid requestId, const QString &error);
-    void digitalInputStatusChanged(QString &circuit, bool value);
-    void digitalOutputStatusChanged(QString &circuit, bool value);
+    void requestExecuted(const QUuid &requestId, bool success);
+    void requestError(const QUuid &requestId, const QString &error);
+    void digitalInputStatusChanged(const QString &circuit, bool value);
+    void digitalOutputStatusChanged(const QString &circuit, bool value);
 
-    void analogInputStatusChanged(QString &circuit, double value);
-    void analogOutputStatusChanged(QString &circuit, double value);
+    void analogInputStatusChanged(const QString &circuit, double value);
+    void analogOutputStatusChanged(const QString &circuit, double value);
 
-    void userLEDStatusChanged(QString &circuit, bool value);
+    void userLEDStatusChanged(const QString &circuit, bool value);
 
     void connectionStateChanged(bool state);
 

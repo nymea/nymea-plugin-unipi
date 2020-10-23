@@ -1,28 +1,36 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                         *
- *  Copyright (C) 2019 Bernhard Trinnes <bernhard.trinnes@nymea.io>        *
- *  Copyright (C) 2018 Simon Stürz <simon.stuerz@nymea.io>                 *
- *                                                                         *
- *  This file is part of nymea.                                            *
- *                                                                         *
- *  This library is free software; you can redistribute it and/or          *
- *  modify it under the terms of the GNU Lesser General Public             *
- *  License as published by the Free Software Foundation; either           *
- *  version 2.1 of the License, or (at your option) any later version.     *
- *                                                                         *
- *  This library is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
- *  Lesser General Public License for more details.                        *
- *                                                                         *
- *  You should have received a copy of the GNU Lesser General Public       *
- *  License along with this library; If not, see                           *
- *  <http://www.gnu.org/licenses/>.                                        *
- *                                                                         *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*
+* Copyright 2013 - 2020, nymea GmbH
+* Contact: contact@nymea.io
+*
+* This file is part of nymea.
+* This project including source code and documentation is protected by
+* copyright law, and remains the property of nymea GmbH. All rights, including
+* reproduction, publication, editing and translation, are reserved. The use of
+* this project is subject to the terms of a license agreement to be concluded
+* with nymea GmbH in accordance with the terms of use of nymea GmbH, available
+* under https://nymea.io/license
+*
+* GNU Lesser General Public License Usage
+* Alternatively, this project may be redistributed and/or modified under the
+* terms of the GNU Lesser General Public License as published by the Free
+* Software Foundation; version 3. This project is distributed in the hope that
+* it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with this project. If not, see <https://www.gnu.org/licenses/>.
+*
+* For any further details and any questions please contact us under
+* contact@nymea.io or see our FAQ/Licensing Information on
+* https://nymea.io/license/faq
+*
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "integrationpluginunipi.h"
 #include "plugininfo.h"
+#include "hardware/i2c/i2cmanager.h"
 
 #include <QJsonDocument>
 #include <QTimer>
@@ -66,7 +74,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
 
     if (ThingClassId == digitalInputThingClassId) {
         foreach(Thing *parent, myThings()) {
-            if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
+            if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
                 foreach (QString circuit, m_unipi->digitalInputs()) {
                     ThingDescriptor thingDescriptor(digitalInputThingClassId, QString("Digital input %1").arg(circuit), "UniPi 1", parent->id());
                     foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
@@ -123,7 +131,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == digitalOutputThingClassId) {
         foreach(Thing *parent, myThings()) {
-            if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
+            if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
                 foreach (QString circuit, m_unipi->digitalOutputs()) {
                     ThingDescriptor ThingDescriptor(digitalOutputThingClassId, QString("Digital output %1").arg(circuit), "UniPi 1", parent->id());
                     foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
@@ -180,7 +188,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == analogInputThingClassId) {
         foreach(Thing *parent, myThings()) {
-            if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
+            if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
                 foreach (QString circuit, m_unipi->analogInputs()) {
                     ThingDescriptor ThingDescriptor(analogInputThingClassId, QString("Analog input %1").arg(circuit), "UniPi", parent->id());
                     foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
@@ -236,7 +244,25 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == analogOutputThingClassId) {
-        //TODO add unipi 1 and unipi 1 lite
+        foreach(Thing *parent, myThings()) {
+            if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
+                foreach (QString circuit, m_unipi->analogOutputs()) {
+                    ThingDescriptor ThingDescriptor(analogOutputThingClassId, QString("Analog Output %1").arg(circuit), "UniPi", parent->id());
+                    foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
+                        if (thing->paramValue(analogOutputThingCircuitParamTypeId) == circuit) {
+                            qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parent->id();
+                            ThingDescriptor.setThingId(thing->id());
+                            break;
+                        }
+                    }
+                    ParamList params;
+                    params.append(Param(analogOutputThingCircuitParamTypeId, circuit));
+                    ThingDescriptor.setParams(params);
+                    info->addThingDescriptor(ThingDescriptor);
+                }
+                break;
+            }
+        }
 
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
             ThingId parentId = m_neuronExtensions.key(neuronExtension);
@@ -329,9 +355,9 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("There is already a UniPi gateway in the system.")); //only one parent Thing allowed
 
         if(thing->thingClassId() == uniPi1ThingClassId) {
-            m_unipi = new UniPi(UniPi::UniPiType::UniPi1, this);
+            m_unipi = new UniPi(hardwareManager()->i2cManager(), UniPi::UniPiType::UniPi1, this);
         } else if (thing->thingClassId() == uniPi1LiteThingClassId) {
-            m_unipi = new UniPi(UniPi::UniPiType::UniPi1Lite, this);
+            m_unipi = new UniPi(hardwareManager()->i2cManager(), UniPi::UniPiType::UniPi1Lite, this);
         }
 
         if (!m_unipi->init()) {
@@ -544,7 +570,7 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
             double analogValue = action.param(analogOutputOutputValueActionOutputValueParamTypeId).value().toDouble();
 
             if (m_unipi) {
-                if(m_unipi->setAnalogOutput(analogOutputNumber, analogValue)) {
+                if(m_unipi->setAnalogOutput(analogValue)) {
                     info->finish(Thing::ThingErrorNoError);
                 } else {
                     info->finish(Thing::ThingErrorHardwareFailure);
@@ -700,7 +726,7 @@ void IntegrationPluginUniPi::onNeuronConnectionStateChanged(bool state)
     thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), state);
 }
 
-void IntegrationPluginUniPi::onNeuronDigitalInputStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronDigitalInputStatusChanged(const QString &circuit, bool value)
 {
     Neuron *neuron = static_cast<Neuron *>(sender());
 
@@ -715,7 +741,7 @@ void IntegrationPluginUniPi::onNeuronDigitalInputStatusChanged(QString &circuit,
     }
 }
 
-void IntegrationPluginUniPi::onNeuronExtensionDigitalInputStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronExtensionDigitalInputStatusChanged(const QString &circuit, bool value)
 {
     NeuronExtension *neuronExtension = static_cast<NeuronExtension *>(sender());
 
@@ -730,7 +756,7 @@ void IntegrationPluginUniPi::onNeuronExtensionDigitalInputStatusChanged(QString 
     }
 }
 
-void IntegrationPluginUniPi::onNeuronDigitalOutputStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronDigitalOutputStatusChanged(const QString &circuit, bool value)
 {
     Neuron *neuron = static_cast<Neuron *>(sender());
 
@@ -745,7 +771,7 @@ void IntegrationPluginUniPi::onNeuronDigitalOutputStatusChanged(QString &circuit
     }
 }
 
-void IntegrationPluginUniPi::onNeuronExtensionDigitalOutputStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronExtensionDigitalOutputStatusChanged(const QString &circuit, bool value)
 {
     NeuronExtension *neuronExtension = static_cast<NeuronExtension *>(sender());
 
@@ -760,7 +786,7 @@ void IntegrationPluginUniPi::onNeuronExtensionDigitalOutputStatusChanged(QString
     }
 }
 
-void IntegrationPluginUniPi::onNeuronAnalogInputStatusChanged(QString &circuit, double value)
+void IntegrationPluginUniPi::onNeuronAnalogInputStatusChanged(const QString &circuit, double value)
 {
     Neuron *neuron = static_cast<Neuron *>(sender());
 
@@ -775,7 +801,7 @@ void IntegrationPluginUniPi::onNeuronAnalogInputStatusChanged(QString &circuit, 
     }
 }
 
-void IntegrationPluginUniPi::onNeuronExtensionAnalogInputStatusChanged(QString &circuit, double value)
+void IntegrationPluginUniPi::onNeuronExtensionAnalogInputStatusChanged(const QString &circuit, double value)
 {
     NeuronExtension *neuronExtension = static_cast<NeuronExtension *>(sender());
 
@@ -789,7 +815,7 @@ void IntegrationPluginUniPi::onNeuronExtensionAnalogInputStatusChanged(QString &
     }
 }
 
-void IntegrationPluginUniPi::onNeuronAnalogOutputStatusChanged(QString &circuit, double value)
+void IntegrationPluginUniPi::onNeuronAnalogOutputStatusChanged(const QString &circuit, double value)
 {
     Neuron *neuron = static_cast<Neuron *>(sender());
 
@@ -804,7 +830,7 @@ void IntegrationPluginUniPi::onNeuronAnalogOutputStatusChanged(QString &circuit,
     }
 }
 
-void IntegrationPluginUniPi::onNeuronExtensionAnalogOutputStatusChanged(QString &circuit, double value)
+void IntegrationPluginUniPi::onNeuronExtensionAnalogOutputStatusChanged(const QString &circuit, double value)
 {
     NeuronExtension *neuronExtension = static_cast<NeuronExtension *>(sender());
 
@@ -819,7 +845,7 @@ void IntegrationPluginUniPi::onNeuronExtensionAnalogOutputStatusChanged(QString 
     }
 }
 
-void IntegrationPluginUniPi::onNeuronUserLEDStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronUserLEDStatusChanged(const QString &circuit, bool value)
 {
     Neuron *neuron = static_cast<Neuron *>(sender());
 
@@ -845,7 +871,7 @@ void IntegrationPluginUniPi::onNeuronExtensionConnectionStateChanged(bool state)
     thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), state);
 }
 
-void IntegrationPluginUniPi::onRequestExecuted(QUuid requestId, bool success)
+void IntegrationPluginUniPi::onRequestExecuted(const QUuid &requestId, bool success)
 {
     if (m_asyncActions.contains(requestId)){
         ThingActionInfo *info = m_asyncActions.take(requestId);
@@ -857,7 +883,7 @@ void IntegrationPluginUniPi::onRequestExecuted(QUuid requestId, bool success)
     }
 }
 
-void IntegrationPluginUniPi::onRequestError(QUuid requestId, const QString &error)
+void IntegrationPluginUniPi::onRequestError(const QUuid &requestId, const QString &error)
 {
     if (m_asyncActions.contains(requestId)){
         ThingActionInfo *info = m_asyncActions.take(requestId);
@@ -865,7 +891,7 @@ void IntegrationPluginUniPi::onRequestError(QUuid requestId, const QString &erro
     }
 }
 
-void IntegrationPluginUniPi::onNeuronExtensionUserLEDStatusChanged(QString &circuit, bool value)
+void IntegrationPluginUniPi::onNeuronExtensionUserLEDStatusChanged(const QString &circuit, bool value)
 {
     NeuronExtension *neuronExtension = static_cast<NeuronExtension *>(sender());
 
@@ -925,13 +951,11 @@ void IntegrationPluginUniPi::onModbusRTUStateChanged(QModbusDevice::State state)
 void IntegrationPluginUniPi::onUniPiDigitalInputStatusChanged(const QString &circuit, bool value)
 {
     qDebug(dcUniPi) << "Digital Input changed" << circuit << value;
-    foreach(Thing *thing, myThings()) {
-        if (thing->thingClassId() == digitalInputThingClassId) {
-            if (thing->paramValue(digitalInputThingCircuitParamTypeId).toString() == circuit) {
+    Q_FOREACH (Thing *thing, myThings().filterByThingClassId(digitalInputThingClassId)) {
+        if (thing->paramValue(digitalInputThingCircuitParamTypeId).toString() == circuit) {
 
-                thing->setStateValue(digitalInputInputStatusStateTypeId, value);
-                return;
-            }
+            thing->setStateValue(digitalInputInputStatusStateTypeId, value);
+            return;
         }
     }
 }
@@ -939,45 +963,31 @@ void IntegrationPluginUniPi::onUniPiDigitalInputStatusChanged(const QString &cir
 void IntegrationPluginUniPi::onUniPiDigitalOutputStatusChanged(const QString &circuit, bool value)
 {
     qDebug(dcUniPi) << "Digital Output changed" << circuit << value;
-    foreach(Thing *thing, myThings()) {
-        if (thing->thingClassId() == digitalOutputThingClassId) {
-            if (thing->paramValue(digitalOutputThingCircuitParamTypeId).toString() == circuit) {
-
-                thing->setStateValue(digitalOutputPowerStateTypeId, value);
-                return;
-            }
+    Q_FOREACH (Thing *thing, myThings().filterByThingClassId(digitalOutputThingClassId)) {
+        if (thing->paramValue(digitalOutputThingCircuitParamTypeId).toString() == circuit) {
+            thing->setStateValue(digitalOutputPowerStateTypeId, value);
+            return;
         }
     }
 }
 
 void IntegrationPluginUniPi::onUniPiAnalogInputStatusChanged(const QString &circuit, double value)
 {
-    qDebug(dcUniPi) << "Digital Input changed" << circuit << value;
-    foreach(Thing *thing, myThings()) {
-        if (thing->thingClassId() == analogInputThingClassId) {
-            if (thing->paramValue(analogInputThingCircuitParamTypeId).toString() == circuit) {
-                thing->setStateValue(analogInputInputValueStateTypeId, value);
-                return;
-            }
+    qDebug(dcUniPi) << "Analog Input changed" << circuit << value;
+    Q_FOREACH (Thing *thing, myThings().filterByThingClassId(analogInputThingClassId)) {
+        if (thing->paramValue(analogInputThingCircuitParamTypeId).toString() == circuit) {
+            thing->setStateValue(analogInputInputValueStateTypeId, value);
+            return;
         }
     }
 }
 
-void IntegrationPluginUniPi::onUniPiAnalogOutputStatusChanged(const QString &circuit, double value)
+void IntegrationPluginUniPi::onUniPiAnalogOutputStatusChanged(double value)
 {
-    foreach(Thing *parent, myThings()) {
-        if ((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) {
-            foreach(Thing *thing, myThings().filterByParentId(parent->id())) {
-                if (thing->thingClassId() == analogOutputThingClassId) {
-                    if (thing->paramValue(analogOutputThingCircuitParamTypeId).toString() == circuit) {
-
-                        thing->setStateValue(analogOutputOutputValueStateTypeId, value);
-                        return;
-                    }
-                }
-            }
-            break;
-        }
+    qDebug(dcUniPi) << "Analog output changed" << value;
+    Q_FOREACH (Thing *thing, myThings().filterByThingClassId(analogOutputThingClassId)) {
+        thing->setStateValue(analogOutputOutputValueStateTypeId, value);
+        return;
     }
 }
 

@@ -28,38 +28,61 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef I2CPORT_H
-#define I2CPORT_H
+#ifndef UNIPIPWM_H
+#define UNIPIPWM_H
 
 #include <QObject>
+#include <QDebug>
+#include <QFile>
+#include <QDir>
 
-class I2CPortPrivate;
-
-class I2CPort : public QObject
+class UniPiPwm : public QObject
 {
     Q_OBJECT
 public:
-    explicit I2CPort(const QString &portName, QObject *parent = nullptr);
+    enum Polarity {
+        PolarityNormal,
+        PolarityInversed,
+        PolarityInvalid
+    };
 
-    static QStringList availablePorts();
+    explicit UniPiPwm(int chipNumber, QObject *parent = nullptr);
+    ~UniPiPwm();
 
-    QList<int> scanRegirsters();
+    static bool isAvailable();
 
-    int deviceDescriptor() const;
-    int address() const;
-    QString portName() const;
-    QString portDeviceName() const;
+    bool exportPwm();
 
-    bool isOpen() const;
-    bool isValid() const;
+    bool enable();
+    bool disable();
 
-public slots:
-    bool openPort(int i2cAddress = 0);
-    void closePort();
+    bool isEnabled();
+
+    int chipNumber();
+
+    long period();
+    bool setPeriod(long nanoSeconds);
+
+    double frequency();
+    bool setFrequency(double kHz);
+
+    long dutyCycle();
+    bool setDutyCycle(long nanoSeconds);
+
+    UniPiPwm::Polarity polarity();
+    bool setPolarity(UniPiPwm::Polarity polarity);
+
+    int percentage();
+    bool setPercentage(int percentage);
 
 private:
-    I2CPortPrivate *d_ptr = nullptr;
+    int m_chipNumber;
+    long m_period;
+    long m_dutyCycle;
+    QDir m_pwmDirectory;
 
+    bool unexportPwm();
 };
 
-#endif // I2CPORT_H
+
+#endif // UNIPIPWM_H

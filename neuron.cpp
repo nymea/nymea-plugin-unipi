@@ -1,24 +1,32 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                         *
- *  Copyright (C) 2019 Bernhard Trinnes <bernhard.trinnes@nymea.io>        *
- *                                                                         *
- *  This file is part of nymea.                                            *
- *                                                                         *
- *  This library is free software; you can redistribute it and/or          *
- *  modify it under the terms of the GNU Lesser General Public             *
- *  License as published by the Free Software Foundation; either           *
- *  version 2.1 of the License, or (at your option) any later version.     *
- *                                                                         *
- *  This library is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
- *  Lesser General Public License for more details.                        *
- *                                                                         *
- *  You should have received a copy of the GNU Lesser General Public       *
- *  License along with this library; If not, see                           *
- *  <http://www.gnu.org/licenses/>.                                        *
- *                                                                         *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*
+* Copyright 2013 - 2020, nymea GmbH
+* Contact: contact@nymea.io
+*
+* This file is part of nymea.
+* This project including source code and documentation is protected by
+* copyright law, and remains the property of nymea GmbH. All rights, including
+* reproduction, publication, editing and translation, are reserved. The use of
+* this project is subject to the terms of a license agreement to be concluded
+* with nymea GmbH in accordance with the terms of use of nymea GmbH, available
+* under https://nymea.io/license
+*
+* GNU Lesser General Public License Usage
+* Alternatively, this project may be redistributed and/or modified under the
+* terms of the GNU Lesser General Public License as published by the Free
+* Software Foundation; version 3. This project is distributed in the hope that
+* it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with this project. If not, see <https://www.gnu.org/licenses/>.
+*
+* For any further details and any questions please contact us under
+* contact@nymea.io or see our FAQ/Licensing Information on
+* https://nymea.io/license/faq
+*
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "neuron.h"
 #include "extern-plugininfo.h"
@@ -365,23 +373,22 @@ bool Neuron::loadModbusMap()
 }
 
 
-bool Neuron::modbusWriteRequest(QUuid requestId, QModbusDataUnit request)
+bool Neuron::modbusWriteRequest(const Request &request)
 {
     if (!m_modbusInterface)
         return false;
 
-    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request, m_slaveAddress)) {
+    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request.data, m_slaveAddress)) {
         if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
-                reply->deleteLater();
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [reply, request, this] {
 
                 if (!m_writeRequestQueue.isEmpty()) {
-                    QPair<QUuid, QModbusDataUnit> request = m_writeRequestQueue.takeFirst();
-                    modbusWriteRequest(request.first, request.second);
+                    modbusWriteRequest(m_writeRequestQueue.takeFirst());
                 }
 
                 if (reply->error() == QModbusDevice::NoError) {
-                    requestExecuted(requestId, true);
+                    requestExecuted(request.id, true);
                     const QModbusDataUnit unit = reply->result();
                     int modbusAddress = unit.startAddress();
                     if(m_modbusDigitalOutputRegisters.values().contains(modbusAddress)){
@@ -395,9 +402,9 @@ bool Neuron::modbusWriteRequest(QUuid requestId, QModbusDataUnit request)
                         emit userLEDStatusChanged(circuit, unit.value(0));
                     }
                 } else {
-                    requestExecuted(requestId, false);
+                    requestExecuted(request.id, false);
                     qCWarning(dcUniPi()) << "Write response error:" << reply->error();
-                    emit requestError(requestId, reply->errorString());
+                    emit requestError(request.id, reply->errorString());
                 }
             });
             QTimer::singleShot(m_responseTimeoutTime, reply, &QModbusReply::deleteLater);
@@ -413,15 +420,16 @@ bool Neuron::modbusWriteRequest(QUuid requestId, QModbusDataUnit request)
 }
 
 
-bool Neuron::modbusReadRequest(QModbusDataUnit request)
+bool Neuron::modbusReadRequest(const QModbusDataUnit &request)
 {
     if (!m_modbusInterface)
         return false;
 
     if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [reply, this] {
-                reply->deleteLater();
+
                 int modbusAddress = 0;
 
                 if (reply->error() == QModbusDevice::NoError) {
@@ -703,19 +711,19 @@ QUuid Neuron::setDigitalOutput(const QString &circuit, bool value)
     int modbusAddress = m_modbusDigitalOutputRegisters.value(circuit);
     //qDebug(dcUniPi()) << "Setting digital ouput" << circuit << modbusAddress << value;
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
-    request.setValue(0, static_cast<uint16_t>(value));
-
-    QUuid requestId = QUuid::createUuid();
+    Request request;
+    request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
+    request.data.setValue(0, static_cast<uint16_t>(value));
+    request.id = QUuid::createUuid();
 
     if (m_writeRequestQueue.isEmpty()) {
-        modbusWriteRequest(requestId, request);
+        modbusWriteRequest(request);
     } else if (m_writeRequestQueue.length() > 100) {
         return "";
     } else {
-        m_writeRequestQueue.append(QPair<QUuid, QModbusDataUnit>(requestId, request));
+        m_writeRequestQueue.append(request);
     }
-    return requestId;
+    return request.id;
 }
 
 
@@ -748,20 +756,21 @@ QUuid Neuron::setAnalogOutput(const QString &circuit, double value)
     if (!m_modbusInterface)
         return "";
 
-    QUuid requestId = QUuid::createUuid();
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 2);
-    request.setValue(0, (static_cast<uint32_t>(value) >> 16));    //FIXME
-    request.setValue(0, (static_cast<uint32_t>(value) & 0xffff)); //FIXME
+    Request request;
+    request.id = QUuid::createUuid();
+    request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 2);
+    request.data.setValue(0, (static_cast<uint32_t>(value) >> 16));    //FIXME
+    request.data.setValue(0, (static_cast<uint32_t>(value) & 0xffff)); //FIXME
 
     if (m_writeRequestQueue.isEmpty()) {
-        modbusWriteRequest(requestId, request);
+        modbusWriteRequest(request);
     } else if (m_writeRequestQueue.length() > 100) {
         return "";
     } else {
-        m_writeRequestQueue.append(QPair<QUuid, QModbusDataUnit>(requestId, request));
+        m_writeRequestQueue.append(request);
     }
 
-    return requestId;
+    return request.id;
 }
 
 
@@ -793,20 +802,21 @@ QUuid Neuron::setUserLED(const QString &circuit, bool value)
     if (!m_modbusInterface)
         return "";
 
-    QUuid requestId = QUuid::createUuid();
+    Request request;
+    request.id = QUuid::createUuid();
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
-    request.setValue(0, static_cast<uint16_t>(value));
+    request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
+    request.data.setValue(0, static_cast<uint16_t>(value));
 
     if (m_writeRequestQueue.isEmpty()) {
-        modbusWriteRequest(requestId, request);
+        modbusWriteRequest(request);
     } else if (m_writeRequestQueue.length() > 100) {
         return "";
     } else {
-        m_writeRequestQueue.append(QPair<QUuid, QModbusDataUnit>(requestId, request));
+        m_writeRequestQueue.append(request);
     }
 
-    return requestId;
+    return request.id;
 }
 
 

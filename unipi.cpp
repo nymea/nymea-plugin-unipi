@@ -1,44 +1,66 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                         *
- *  Copyright (C) 2019 Bernhard Trinnes <bernhard.trinnes@nymea.io>        *
- *                                                                         *
- *  This file is part of nymea.                                            *
- *                                                                         *
- *  This library is free software; you can redistribute it and/or          *
- *  modify it under the terms of the GNU Lesser General Public             *
- *  License as published by the Free Software Foundation; either           *
- *  version 2.1 of the License, or (at your option) any later version.     *
- *                                                                         *
- *  This library is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
- *  Lesser General Public License for more details.                        *
- *                                                                         *
- *  You should have received a copy of the GNU Lesser General Public       *
- *  License along with this library; If not, see                           *
- *  <http://www.gnu.org/licenses/>.                                        *
- *                                                                         *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*
+* Copyright 2013 - 2020, nymea GmbH
+* Contact: contact@nymea.io
+*
+* This file is part of nymea.
+* This project including source code and documentation is protected by
+* copyright law, and remains the property of nymea GmbH. All rights, including
+* reproduction, publication, editing and translation, are reserved. The use of
+* this project is subject to the terms of a license agreement to be concluded
+* with nymea GmbH in accordance with the terms of use of nymea GmbH, available
+* under https://nymea.io/license
+*
+* GNU Lesser General Public License Usage
+* Alternatively, this project may be redistributed and/or modified under the
+* terms of the GNU Lesser General Public License as published by the Free
+* Software Foundation; version 3. This project is distributed in the hope that
+* it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with this project. If not, see <https://www.gnu.org/licenses/>.
+*
+* For any further details and any questions please contact us under
+* contact@nymea.io or see our FAQ/Licensing Information on
+* https://nymea.io/license/faq
+*
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "unipi.h"
 #include "extern-plugininfo.h"
 #include <QProcess>
 #include <QTimer>
 
-UniPi::UniPi(UniPiType unipiType, QObject *parent) :
+UniPi::UniPi(I2CManager *i2cManager, UniPiType unipiType, QObject *parent) :
     QObject(parent),
+    m_i2cManager(i2cManager),
     m_unipiType(unipiType)
 {
     m_mcp23008 = new MCP23008("i2c-1", 0x20, this);
-    m_mcp3422 = new MCP3422("i2c-1", 0x68, this);
+    m_analogInputChannel1 = new MCP342XChannel("i2c-1", 0x68, 0, MCP342XChannel::Gain_1, this);
+    m_analogInputChannel2 = new MCP342XChannel("i2c-1", 0x68, 1, MCP342XChannel::Gain_1, this);
+
+    m_analogOutput = new UniPiPwm(0, this);
 }
 
 UniPi::~UniPi()
 {
     m_mcp23008->deleteLater();
 
-    m_mcp3422->disable();
-    m_mcp3422->deleteLater();
+    //m_i2cManager->close(m_analogInputChannel1);
+    m_analogInputChannel1->deleteLater();
+    //m_i2cManager->close(m_analogInputChannel2);
+    m_analogInputChannel2->deleteLater();
+
+    Q_FOREACH (GpioMonitor *gpio, m_monitorGpios.keys()) {
+        gpio->disable();
+        gpio->deleteLater();
+    }
+
+    m_analogOutput->disable();
+    m_analogOutput->deleteLater();
 }
 
 bool UniPi::init()
@@ -50,11 +72,11 @@ bool UniPi::init()
         m_mcp23008->writeRegister(MCP23008::RegisterAddress::GPPU, 0x00);  //disable all pull up resistors
         m_mcp23008->writeRegister(MCP23008::RegisterAddress::OLAT, 0x00);  //Set all outputs to low
     } else {
-       qCWarning(dcUniPi()) << "Could not init MCP23008";
-       return false;
+        qCWarning(dcUniPi()) << "Could not init MCP23008";
+        return false;
     }
 
-     // In case of re-init
+    // In case of re-init
     if (!m_monitorGpios.isEmpty()) {
         foreach (GpioMonitor *gpio, m_monitorGpios.keys()) {
             m_monitorGpios.remove(gpio);
@@ -64,46 +86,67 @@ bool UniPi::init()
 
     //Init Raspberry Pi Inputs
     foreach (QString circuit, digitalInputs()){
-        int pin = getPinFromCircuit(circuit);
-        QProcess::execute(QString("gpio -g mode %1 up").arg(pin));
 
-        GpioMonitor *gpio = new GpioMonitor(pin, this);
-        if (!gpio->enable()) {
+        int pin = getPinFromCircuit(circuit);
+
+        GpioMonitor *gpioMonitor = new GpioMonitor(pin, this);
+        if (!gpioMonitor->enable()) {
             qCWarning(dcUniPi()) << "Could not enable gpio monitor for pin" << pin;
             return false;
         } else {
-            QTimer::singleShot(1000, [gpio, circuit, this]() {
-                emit digitalInputStatusChanged(circuit, gpio->value()); //set initial status
-                connect(gpio, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
-                m_monitorGpios.insert(gpio, circuit);
+            QProcess::execute(QString("gpio -g mode %1 up").arg(pin));
+            QTimer::singleShot(1000, this, [gpioMonitor, circuit, this]() {
+                emit digitalInputStatusChanged(circuit, gpioMonitor->value()); //set initial status
+                connect(gpioMonitor, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
+                m_monitorGpios.insert(gpioMonitor, circuit);
             });
         }
     }
+    //Init Raspberry Pi PWM output
+    if (!m_analogOutput->exportPwm()) {
+        qCWarning(dcUniPi()) << "Error could not export analog output";
+        return false;
+    }
 
-    // In case of re-init
-    if (!m_pwms.isEmpty()) {
-        foreach (Pwm *pwm, m_pwms.keys()) {
-            m_pwms.remove(pwm);
-            pwm->deleteLater();
+    if (!m_analogOutput->enable()) {
+        qCWarning(dcUniPi()) << "Error could not enable analog output";
+        return false;
+    }
+    m_analogOutput->setPolarity(UniPiPwm::PolarityNormal);
+    m_analogOutput->setFrequency(400);
+    m_analogOutput->setPercentage(0);
+
+    if (!m_i2cManager->open(m_analogInputChannel1)) {
+        qCDebug(dcUniPi()) << "Failed to open analog channel 1";
+        return false;
+    }
+    connect(m_analogInputChannel1, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
+
+        if (data.length() < 3) {
+            qCWarning(dcUniPi()) << "Error reading data from analog channel 1" << data;
+            return;
         }
-    }
+        qint16 rawValue = (static_cast<quint16>(data[0]) << 8) | data[1];
+        double voltage = (rawValue * 0.001 * 5.51)/2.00;
+        emit analogInputStatusChanged("AI1", voltage);
+    });
+    m_i2cManager->startReading(m_analogInputChannel1, 5000);
 
-    //Init Raspberry Pi PWM outputs
-    foreach (QString circuit, analogOutputs()) {
-        int pin = getPinFromCircuit(circuit);
-        Pwm *pwm = new Pwm(pin, this);
-        pwm->enable();
-        pwm->setPolarity(Pwm::PolarityNormal);
-        pwm->setFrequency(400);
-        pwm->setPercentage(0);
-        m_pwms.insert(pwm, circuit);
+    if (!m_i2cManager->open(m_analogInputChannel2)) {
+        qCDebug(dcUniPi()) << "Failed to open analog channel 2";
+        return false;
     }
+    connect(m_analogInputChannel2, &MCP342XChannel::readingAvailable, this, [this] (const QByteArray &data){
 
-    foreach (QString circuit, analogInputs()){
-        int pin = getPinFromCircuit(circuit);
-        Q_UNUSED(pin)
-        //TODO Init Raspberry Pi Analog Input
-    }
+        if (data.length() < 3) {
+            qCWarning(dcUniPi()) << "Error reading data from analog channel 2" << data;
+            return;
+        }
+        qint16 rawValue = (static_cast<quint16>(data[0]) << 8) | data[1];
+        double voltage = (rawValue * 0.001 * 5.51)/2.00;
+        emit analogInputStatusChanged("AI2", voltage);
+    });
+    m_i2cManager->startReading(m_analogInputChannel2, 5000);
     return true;
 }
 
@@ -144,7 +187,7 @@ QList<QString> UniPi::digitalOutputs()
     QList<QString> outputs;
     switch (m_unipiType) {
     case UniPiType::UniPi1:
-        for (int i = 1; i < 7; ++i) {
+        for (int i = 1; i < 9; ++i) {
             outputs.append(QString("DO%1").arg(i));
         }
         break;
@@ -162,12 +205,12 @@ QList<QString> UniPi::analogInputs()
     QList<QString> inputs;
     switch (m_unipiType) {
     case UniPiType::UniPi1:
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 1; i < 3; ++i) {
             inputs.append(QString("AI%1").arg(i));
         }
         break;
     case UniPiType::UniPi1Lite:
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 1; i < 3; ++i) {
             inputs.append(QString("AI%1").arg(i));
         }
         break;
@@ -178,18 +221,7 @@ QList<QString> UniPi::analogInputs()
 QList<QString> UniPi::analogOutputs()
 {
     QList<QString> outputs;
-    switch (m_unipiType) {
-    case UniPiType::UniPi1:
-        for (int i = 0; i < 1; ++i) {
-            outputs.append(QString("AO%1").arg(i));
-        }
-        break;
-    case UniPiType::UniPi1Lite:
-        for (int i = 0; i < 1; ++i) {
-            outputs.append(QString("AO%1").arg(i));
-        }
-        break;
-    }
+    outputs.append("AO");
     return outputs;
 }
 
@@ -336,66 +368,35 @@ bool UniPi::getDigitalInput(const QString &circuit)
 {
     int pin = getPinFromCircuit(circuit);
     if (pin == 0) {
-        qWarning(dcUniPi()) << "Out of range pin number";
+        qCWarning(dcUniPi()) << "Out of range pin number";
         return false;
     }
-    if (!m_monitorGpios.values().contains(circuit))
+    if (!m_monitorGpios.values().contains(circuit)) {
+        qCWarning(dcUniPi()) << "Could not read digital inpu, GPIO not initialized" << circuit;
         return false;
+    }
     //Read RPi pins
     GpioMonitor *gpio = m_monitorGpios.key(circuit);
     digitalInputStatusChanged(circuit, gpio->value());
     return true;
 }
 
-bool UniPi::setAnalogOutput(const QString &circuit, double value)
+bool UniPi::setAnalogOutput(double value)
 {
-    int pin = getPinFromCircuit(circuit);
-    if (pin == 0) {
-        qWarning(dcUniPi()) << "Out of range pin number";
-        return false;
-    }
-    if (!m_pwms.values().contains(circuit))
-        return false;
     int percentage = value * 10;     //convert volt to percentage
-    Pwm *pwm = m_pwms.key(circuit);
-    if(!pwm->setPercentage(percentage))
+    if(!m_analogOutput->setPercentage(percentage))
         return false;
 
-    getAnalogOutput(circuit);
+    getAnalogOutput();
     return true;
 }
 
-bool UniPi::getAnalogOutput(const QString &circuit)
+bool UniPi::getAnalogOutput()
 {
-    int pin = getPinFromCircuit(circuit);
-    if (pin == 0) {
-        qWarning(dcUniPi()) << "Out of range pin number";
-        return false;
-    }
-    Pwm *pwm = m_pwms.key(circuit);
-    double voltage = pwm->percentage()/10.0;
-    emit analogOutputStatusChanged(circuit, voltage);
+    double voltage = m_analogOutput->percentage()/10.0;
+    emit analogOutputStatusChanged(voltage);
 
     return true;
-}
-
-bool UniPi::getAnalogInput(const QString &circuit)
-{
-    int pin = getPinFromCircuit(circuit);
-    if (pin == 0) {
-        qWarning(dcUniPi()) << "Out of range pin number";
-        return false;
-    }
-
-    double voltage;
-    if (pin == 1) {
-        voltage= m_mcp3422->getChannelValue(MCP3422::Channel1);
-    } else {
-        voltage= m_mcp3422->getChannelValue(MCP3422::Channel2);
-    }
-
-    emit analogInputStatusChanged(circuit, voltage);
-    return false;
 }
 
 void UniPi::onInputValueChanged(const bool &value)
