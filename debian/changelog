@@ -1,7 +1,9 @@
-nymea-plugin-unipi2 (0.1.11) UNRELEASED; urgency=medium
+nymea-plugin-unipi2 (0.1.11) xenial; urgency=medium
 
+  [ Michael Zanetti ]
+  * No change rebuild against new ABI
 
- -- Michael Zanetti <michael.zanetti@nymea.io>  Wed, 23 Dec 2020 15:09:05 +0100
+ -- Jenkins <jenkins@nymea.io>  Wed, 23 Dec 2020 15:27:42 +0100
 
 nymea-plugin-unipi2 (0.1.10) xenial; urgency=medium
 
